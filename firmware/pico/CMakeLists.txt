@@ -12,7 +12,8 @@ add_executable(can-crusher
 )
 
 pico_enable_stdio_usb(can-crusher 1)
-pico_enable_stdio_uart(can-crusher 1)
+# Must be off or it interferes with talking to TMC2209
+pico_enable_stdio_uart(can-crusher 0)
 
 pico_add_extra_outputs(can-crusher)
 
