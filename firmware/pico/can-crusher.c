@@ -100,29 +100,23 @@ void motor_control_crc(char* buffer, int size) {
   buffer[size-1] = crc;
 }
 
-// Has BLOCKING calls. Do not use when we're doing timing
-// Critical motor movements.
-bool motor_control_register_read(motor_t *motor, uint8_t reg, uint32_t *result) {
-  static char read_buffer[4] = {0x05, 0x00, 0x00, 0x00};
-  static char result_buffer[8];
-
-  read_buffer[1] = motor->device_id;
-  read_buffer[2] = reg << 1;
-
-  motor_control_crc(read_buffer, 4);
+// Sending and receiving data has BLOCKING calls. All configuration
+// Should be done before we start moving motors.
+int motor_control_tx_data(motor_t *motor, char* buffer, int size) {
+  motor_control_crc(buffer, size);
 
   while(uart_is_readable(UART_ID)){ uart_getc(UART_ID); }
 
-  uart_write_blocking(UART_ID, read_buffer, 4);
+  uart_write_blocking(UART_ID, buffer, size);
   uart_tx_wait_blocking(UART_ID);
   
   // read back identical data, since we're sharing a uart line.
   char dummy_char;
-  for (int i=0;i<4;i++) {
+  for (int i=0;i<size;i++) {
     if (uart_is_readable(UART_ID)) {
       dummy_char = uart_getc(UART_ID);
-      if (dummy_char != read_buffer[i]) {
-	printf("CHAR %d DIDN'T MATCH. Expected 0x%x, Got 0x%x\n", read_buffer[i], dummy_char);
+      if (dummy_char != buffer[i]) {
+	printf("CHAR %d DIDN'T MATCH. Expected 0x%x, Got 0x%x\n", buffer[i], dummy_char);
 	return -1;
       }
     } else {
@@ -130,33 +124,43 @@ bool motor_control_register_read(motor_t *motor, uint8_t reg, uint32_t *result) 
       return -1;
     }
   }
+  return 0;
+}
 
-  if(!uart_is_readable_within_us(UART_ID, 1000)) {
-    puts("NO RESPONSE!\n");
+int motor_control_register_read(motor_t *motor, uint8_t reg, uint32_t *result) {
+  static char read_buffer[4] = {0x05, 0x00, 0x00, 0x00};
+  static char result_buffer[8];
+
+  read_buffer[1] = motor->device_id;
+  read_buffer[2] = reg;
+
+  if(motor_control_tx_data(motor, read_buffer, 4)) {
+    puts("ERROR SENDING!");
+    return -1;
+  }
+
+  if(!uart_is_readable_within_us(UART_ID, 10000)) {
+    puts("NO RESPONSE!");
     return -1;
   }
   
   uart_read_blocking(UART_ID, result_buffer, 8);
  
-  printf("RESULT: %x %x %x %x %x %x %x %x\n", result_buffer[0], result_buffer[1],
-	 result_buffer[2], result_buffer[3], result_buffer[4],
-	 result_buffer[5], result_buffer[6], result_buffer[7]);
-  
   char result_crc = result_buffer[7];
   motor_control_crc(result_buffer, 8);
 
   if (result_buffer[7] != result_crc) {
-    puts("BAD RECALCULATED CRC\n");
+    puts("BAD RECALCULATED CRC");
     return -1;
   }
   
   if ((result_buffer[0] & 0x0F) != 5) {
-    puts("BAD SYNC FIELD\n");
+    puts("BAD SYNC FIELD");
     return -1;
   }
 
   if (result_buffer[1] != 0xFF) {
-    puts("BAD ID FIELD\n");
+    puts("BAD ID FIELD");
     return -1;
   }
 
@@ -164,6 +168,61 @@ bool motor_control_register_read(motor_t *motor, uint8_t reg, uint32_t *result) 
     (result_buffer[5] << 8) | result_buffer[6];
 
   return 0;
+}
+
+bool motor_control_register_write(motor_t *motor, uint8_t reg, uint32_t value) {
+  static char write_buffer[8] = {0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+  write_buffer[1] = motor->device_id;
+  write_buffer[2] = reg + 128;
+  write_buffer[3] = (value >> 24) & 0xFF;
+  write_buffer[4] = (value >> 16) & 0xFF;
+  write_buffer[5] = (value >> 8) & 0xFF;
+  write_buffer[6] = value & 0xFF;
+
+  
+  return motor_control_tx_data(motor, write_buffer, 8);
+}
+
+
+void query_register(motor_t *left_motor, uint8_t address) {
+  uint32_t test_result;
+  if (!motor_control_register_read(left_motor, address, &test_result)) {
+  
+    printf("Register %x  data %08x\n", address, test_result);
+  } else {
+    printf("Register %x FAIL\n", address, test_result);
+  }
+}
+
+void query_all_registers(motor_t *motor) {
+  query_register(motor, 0x0);
+  query_register(motor, 0x1);
+  query_register(motor, 0x2);
+  query_register(motor, 0x3);
+  query_register(motor, 0x5);
+  query_register(motor, 0x6);
+  query_register(motor, 0x7);
+  
+  query_register(motor, 0x10);
+  query_register(motor, 0x11);
+  query_register(motor, 0x12);
+  query_register(motor, 0x13);
+  query_register(motor, 0x22);
+
+  query_register(motor, 0x14);
+  query_register(motor, 0x40);
+  query_register(motor, 0x41);
+  query_register(motor, 0x42);
+
+  query_register(motor, 0x6A);
+  query_register(motor, 0x6B);
+  
+  query_register(motor, 0x6C);
+  query_register(motor, 0x6F);
+  query_register(motor, 0x70);
+  query_register(motor, 0x71);
+  query_register(motor, 0x72);
 }
 
 int main() {
@@ -201,36 +260,34 @@ int main() {
 
   puts("\x1b[2JInitialization complete.\n");
 
+  puts("Sending test packet to UART\n");
+  motor_set_dir(&left_motor, 1);
   motor_enable(&left_motor);
 
-  puts("Sending test packet to UART\n");
+  motor_control_register_write(&left_motor, 0x40, 0x50);
+  query_register(&left_motor, 0x2);
+  motor_control_register_write(&left_motor, 0x14, 0x00000001);
+  query_register(&left_motor, 0x2);
 
-  uint32_t test_result;
-  motor_control_register_read(&left_motor, 0x0, &test_result);
+  query_all_registers(&left_motor);
 
-  printf("Test UART result data %x\n", test_result);
-
-  
-  motor_control_register_read(&left_motor, 0x1, &test_result);
-  printf("Test UART result data %x\n", test_result);
-  
-  
   puts("Testing left forward...\n");
 
 
   for(int i=0;i<16000;i++) {
     motor_step(&left_motor);
-    sleep_us(500);
+    if (i % 100 == 0) {
+        query_register(&left_motor, 0x06);
+        query_register(&left_motor, 0x41);
+    } else {
+      sleep_us(500);
+    }
 
     if(motor_is_stalled(&left_motor)) {
       puts("STALL DETECTED. ABORT.");
       break;
     }
   }
-
-  //motor_control_register_read(&left_motor, 0x6, &test_result);
-
-  printf("Test UART result data %x\n", test_result);
 
   sleep_ms(500);
   motor_set_dir(&left_motor, 1);
@@ -248,10 +305,6 @@ int main() {
   }
 
   motor_disable(&left_motor);
-
-  motor_control_register_read(&left_motor, 0x0, &test_result);
-
-  printf("Test UART result data %x\n", test_result);
 
   while(1) {};  
 }
