@@ -40,6 +40,11 @@ typedef struct {
   uint ms2_ad1_pin;
 } motor_t;
 
+static motor_t left_motor;
+static motor_t right_motor;
+
+
+
 motor_t motor_init(motor_t *motor, 
 		   uint enable, uint step, uint dir,
 		   uint stall, uint device_id,
@@ -96,7 +101,7 @@ void motor_set_dir(motor_t *motor, uint dir) {
   gpio_put(motor->dir_pin, dir);
 }
 
-bool motor_is_stalled(motor_t *motor) {
+int motor_is_stalled(motor_t *motor) {
   return gpio_get(motor->stall_pin) != 0;
 }
 
@@ -130,6 +135,8 @@ void motor_control_crc(char* buffer, int size) {
 // Sending and receiving data has BLOCKING calls. All configuration
 // Should be done before we start moving motors.
 int motor_control_tx_data(motor_t *motor, char* buffer, int size) {
+  sleep_ms(100); //Seems to get mad if we talk to two different chips to quickly, wait a bit.
+  
   motor_control_crc(buffer, size);
 
   while(uart_is_readable(UART_ID)){ uart_getc(UART_ID); }
@@ -212,6 +219,60 @@ bool motor_control_register_write(motor_t *motor, uint8_t reg, uint32_t value) {
 }
 
 
+void motor_control_enable() {
+  // Can't step while we change the device IDs.
+  motor_disable(&left_motor);
+  motor_disable(&right_motor);
+
+  printf("LEFT: ID %d BIT1 %d BIT2 %d\n", left_motor.device_id, left_motor.device_id & 1,
+	 left_motor.device_id & 2);
+  gpio_put(left_motor.ms1_ad0_pin, left_motor.device_id & 0x1);
+  gpio_put(left_motor.ms2_ad1_pin, left_motor.device_id & 0x2);
+
+  printf("RIGHT ID %d BIT1 %d BIT2 %d\n", right_motor.device_id, right_motor.device_id & 1,
+	 right_motor.device_id & 2);
+  gpio_put(right_motor.ms1_ad0_pin, right_motor.device_id & 0x1);
+  gpio_put(right_motor.ms2_ad1_pin, (right_motor.device_id & 0x2) == 2);
+
+}
+
+void motor_control_disable() {
+  // set back to stepping mode
+  gpio_put(left_motor.ms1_ad0_pin, 0);
+  gpio_put(left_motor.ms2_ad1_pin, 0);
+
+  gpio_put(right_motor.ms1_ad0_pin, 0);
+  gpio_put(right_motor.ms2_ad1_pin, 0);
+
+  // Still don't explicitly enable.
+}  
+
+bool motor_control_stallguard(motor_t *motor) {
+  uint32_t motor_write_counter_start;
+  uint32_t motor_write_counter_finish;
+
+  if (motor_control_register_read(motor, 0x2, &motor_write_counter_start)) {
+    puts("Couldn't read counter START");
+    return false;
+  }
+
+  motor_control_register_write(motor, 0x14, 0xFFFFF);
+  motor_control_register_write(motor, 0x40, 0x30);
+
+  if (motor_control_register_read(motor, 0x2, &motor_write_counter_finish)) {
+    puts("Couldn't read counter FINISH");
+    return false;
+  }
+
+  // puts("GOT FINISH");
+  if (motor_write_counter_finish - motor_write_counter_start != 2) {
+    puts("Counted WRITES doesn't add up");
+    return false;
+  } else {
+    return true;
+  }
+}
+
 void query_register(motor_t *left_motor, uint8_t address) {
   uint32_t test_result;
   if (!motor_control_register_read(left_motor, address, &test_result)) {
@@ -252,9 +313,6 @@ void query_all_registers(motor_t *motor) {
   query_register(motor, 0x72);
 }
 
-static motor_t left_motor;
-static motor_t right_motor;
-
 void motors_init() {
   motor_init(&left_motor, LEFT_ENABLE_PIN, LEFT_STEP_PIN, 
 	     LEFT_DIR_PIN, LEFT_STALL_PIN, LEFT_DEVICE_ID,
@@ -284,8 +342,19 @@ void motors_step() {
   motor_step(&right_motor);
 }
 
-bool motors_are_stalled() {
-  return motor_is_stalled(&left_motor) || motor_is_stalled(&right_motor);
+int motors_are_stalled() {
+  int result = 0;
+  if (motor_is_stalled(&left_motor)) {
+    puts("LEFT STALL");
+    result = result + left_motor.device_id;
+  }
+
+  if (motor_is_stalled(&right_motor)) {
+    puts("RIGHT STALL");
+    result = result + right_motor.device_id;
+  }
+
+  return result;
 }
 
 int main() {
@@ -320,13 +389,16 @@ int main() {
 
   puts("\x1b[2JInitialization complete.\n");
 
+  motor_control_enable();
+
+  if (!motor_control_stallguard(&left_motor)) { puts("LEFT FAILED!");return -1;}
+
+  if (!motor_control_stallguard(&right_motor)) { puts("RIGHT FAILED!"); return -1;}
+  
+  motor_control_disable();
   motors_enable();
 
-  motor_control_register_write(&left_motor, 0x14, 0xFFFFF);
-
-  motor_control_register_write(&left_motor, 0x40, 0x30);
-  query_register(&left_motor, 0x2);
-
+  
   /*    puts("Sending test packet to UART\n");
 
   motor_control_register_write(&left_motor, 0x14, 0x00000001);
@@ -350,18 +422,13 @@ int main() {
 
   sleep_ms(500);*/
 
-  motors_set_dir(0);
+  motors_set_dir(1);
   
   puts("Testing backward\n");
   
   for(int i=0;i<3200;i++) {
     motors_step();
-    if ( i % 100  == 0 ){
-      query_register(&left_motor, 0x06);
-      query_register(&left_motor, 0x41);
-    } else {
-      sleep_us(500);
-    }
+    sleep_us(500);
 
     if(motors_are_stalled()) {
       puts("STALL DETECTED. ABORT.");
