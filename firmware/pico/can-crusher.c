@@ -18,6 +18,11 @@ const uint LEFT_STEP_PIN = 11;
 const uint LEFT_DIR_PIN = 12;
 const uint LEFT_STALL_PIN = 13;
 
+const uint RIGHT_ENABLE_PIN = 21;
+const uint RIGHT_STEP_PIN = 20;
+const uint RIGHT_DIR_PIN = 19;
+const uint RIGHT_STALL_PIN = 18;
+
 typedef struct {
   uint enable_pin;
   uint step_pin;
@@ -225,6 +230,40 @@ void query_all_registers(motor_t *motor) {
   query_register(motor, 0x72);
 }
 
+static motor_t left_motor;
+static motor_t right_motor;
+
+void motors_init() {
+  motor_init(&left_motor, LEFT_ENABLE_PIN, LEFT_STEP_PIN, 
+	     LEFT_DIR_PIN, LEFT_STALL_PIN, 0);
+  motor_init(&right_motor, RIGHT_ENABLE_PIN, RIGHT_STEP_PIN, 
+	     RIGHT_DIR_PIN, RIGHT_STALL_PIN, 0);
+}
+
+void motors_enable() {
+  motor_enable(&left_motor);
+  motor_enable(&right_motor);
+}
+
+void motors_disable() {
+  motor_disable(&left_motor);
+  motor_disable(&right_motor);
+}
+
+void motors_set_dir(int dir) {
+  motor_set_dir(&left_motor, dir);
+  motor_set_dir(&right_motor, dir);
+}
+
+void motors_step() {
+  motor_step(&left_motor);
+  motor_step(&right_motor);
+}
+
+bool motors_are_stalled() {
+  return motor_is_stalled(&left_motor) || motor_is_stalled(&right_motor);
+}
+
 int main() {
   bi_decl(bi_program_description("Firmware for can crusher."));
   bi_decl(bi_1pin_with_name(LED_PIN, "On-board LED"));
@@ -235,11 +274,8 @@ int main() {
   
   stdio_init_all();
 
-  motor_t left_motor;
-  motor_init(&left_motor, LEFT_ENABLE_PIN, LEFT_STEP_PIN, 
-	     LEFT_DIR_PIN, LEFT_STALL_PIN, 0);
-  
-  motor_control_init();
+  motors_init();
+  /*  motor_control_init(); */
   
   gpio_init(LED_PIN);
   gpio_set_dir(LED_PIN, GPIO_OUT);
@@ -260,51 +296,48 @@ int main() {
 
   puts("\x1b[2JInitialization complete.\n");
 
-  puts("Sending test packet to UART\n");
-  motor_set_dir(&left_motor, 1);
-  motor_enable(&left_motor);
+  motors_enable();
 
-  motor_control_register_write(&left_motor, 0x40, 0x50);
+  /*    puts("Sending test packet to UART\n");
+
+motor_control_register_write(&left_motor, 0x40, 0x50);
   query_register(&left_motor, 0x2);
   motor_control_register_write(&left_motor, 0x14, 0x00000001);
   query_register(&left_motor, 0x2);
 
   query_all_registers(&left_motor);
+  */
+  
+  puts("Testing forward...\n");
 
-  puts("Testing left forward...\n");
 
-
-  for(int i=0;i<16000;i++) {
-    motor_step(&left_motor);
-    if (i % 100 == 0) {
-        query_register(&left_motor, 0x06);
-        query_register(&left_motor, 0x41);
-    } else {
-      sleep_us(500);
-    }
-
-    if(motor_is_stalled(&left_motor)) {
+  for(int i=0;i<3200;i++) {
+    sleep_us(500);
+    motors_step();
+    if(motors_are_stalled()) {
       puts("STALL DETECTED. ABORT.");
       break;
     }
   }
+   
 
   sleep_ms(500);
-  motor_set_dir(&left_motor, 1);
 
-  puts("Testing left backward\n");
+  motors_set_dir(1);
   
-  for(int i=0;i<16000;i++) {
-    motor_step(&left_motor);
+  puts("Testing backward\n");
+  
+  for(int i=0;i<3200;i++) {
+    motors_step();
     sleep_us(500);
 
-    if(motor_is_stalled(&left_motor)) {
+    if(motors_are_stalled()) {
       puts("STALL DETECTED. ABORT.");
       break;
     }
   }
 
-  motor_disable(&left_motor);
-
+  motors_disable();
+    
   while(1) {};  
 }
