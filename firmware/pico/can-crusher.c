@@ -275,7 +275,7 @@ int main() {
   stdio_init_all();
 
   motors_init();
-  /*  motor_control_init(); */
+  motor_control_init();
   
   gpio_init(LED_PIN);
   gpio_set_dir(LED_PIN, GPIO_OUT);
@@ -298,17 +298,20 @@ int main() {
 
   motors_enable();
 
+  motor_control_register_write(&left_motor, 0x14, 0xFFFFF);
+
+  motor_control_register_write(&left_motor, 0x40, 0x30);
+  query_register(&left_motor, 0x2);
+
   /*    puts("Sending test packet to UART\n");
 
-motor_control_register_write(&left_motor, 0x40, 0x50);
-  query_register(&left_motor, 0x2);
   motor_control_register_write(&left_motor, 0x14, 0x00000001);
   query_register(&left_motor, 0x2);
 
   query_all_registers(&left_motor);
   */
   
-  puts("Testing forward...\n");
+  /*  puts("Testing forward...\n");
 
 
   for(int i=0;i<3200;i++) {
@@ -321,7 +324,7 @@ motor_control_register_write(&left_motor, 0x40, 0x50);
   }
    
 
-  sleep_ms(500);
+  sleep_ms(500);*/
 
   motors_set_dir(1);
   
@@ -329,7 +332,12 @@ motor_control_register_write(&left_motor, 0x40, 0x50);
   
   for(int i=0;i<3200;i++) {
     motors_step();
-    sleep_us(500);
+    if ( i % 100  == 0 ){
+      query_register(&left_motor, 0x06);
+      query_register(&left_motor, 0x41);
+    } else {
+      sleep_us(500);
+    }
 
     if(motors_are_stalled()) {
       puts("STALL DETECTED. ABORT.");
