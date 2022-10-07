@@ -17,11 +17,18 @@ const uint LEFT_ENABLE_PIN = 10;
 const uint LEFT_STEP_PIN = 11;
 const uint LEFT_DIR_PIN = 12;
 const uint LEFT_STALL_PIN = 13;
+const uint LEFT_MS1_AD0_PIN = 14;
+const uint LEFT_MS2_AD1_PIN = 15;
+const uint LEFT_DEVICE_ID = 1;
+
 
 const uint RIGHT_ENABLE_PIN = 21;
 const uint RIGHT_STEP_PIN = 20;
 const uint RIGHT_DIR_PIN = 19;
 const uint RIGHT_STALL_PIN = 18;
+const uint RIGHT_MS1_AD0_PIN = 17;
+const uint RIGHT_MS2_AD1_PIN = 16;
+const uint RIGHT_DEVICE_ID = 2;
 
 typedef struct {
   uint enable_pin;
@@ -29,15 +36,21 @@ typedef struct {
   uint dir_pin;
   uint stall_pin;
   uint device_id;  // Slave, but done with slave terminology
+  uint ms1_ad0_pin;
+  uint ms2_ad1_pin;
 } motor_t;
 
-motor_t motor_init(motor_t *motor, uint enable, uint step, uint dir,
-		   uint stall, uint device_id) {
+motor_t motor_init(motor_t *motor, 
+		   uint enable, uint step, uint dir,
+		   uint stall, uint device_id,
+		   uint ms1_ad0, uint ms2_ad1) {
   motor->enable_pin = enable;
   motor->step_pin = step;
   motor->dir_pin = dir;
   motor->stall_pin = stall;
   motor->device_id = device_id;
+  motor->ms1_ad0_pin = ms1_ad0;
+  motor->ms2_ad1_pin = ms2_ad1;
   
   // Immediately DISABLE the motor->
   gpio_init(motor->enable_pin);
@@ -54,6 +67,15 @@ motor_t motor_init(motor_t *motor, uint enable, uint step, uint dir,
 
   gpio_init(motor->stall_pin);
   gpio_set_dir(motor->stall_pin, GPIO_IN);
+  
+  gpio_init(motor->ms1_ad0_pin);
+  gpio_set_dir(motor->ms1_ad0_pin, GPIO_OUT);
+  gpio_put(motor->ms1_ad0_pin, 0);
+
+  gpio_init(motor->ms2_ad1_pin);
+  gpio_set_dir(motor->ms2_ad1_pin, GPIO_OUT);
+  gpio_put(motor->ms2_ad1_pin, 0);
+
 }
 
 void motor_enable(motor_t *motor) {
@@ -235,9 +257,11 @@ static motor_t right_motor;
 
 void motors_init() {
   motor_init(&left_motor, LEFT_ENABLE_PIN, LEFT_STEP_PIN, 
-	     LEFT_DIR_PIN, LEFT_STALL_PIN, 0);
+	     LEFT_DIR_PIN, LEFT_STALL_PIN, LEFT_DEVICE_ID,
+	     LEFT_MS1_AD0_PIN, LEFT_MS2_AD1_PIN);
   motor_init(&right_motor, RIGHT_ENABLE_PIN, RIGHT_STEP_PIN, 
-	     RIGHT_DIR_PIN, RIGHT_STALL_PIN, 0);
+	     RIGHT_DIR_PIN, RIGHT_STALL_PIN, RIGHT_DEVICE_ID,
+	     RIGHT_MS1_AD0_PIN, RIGHT_MS2_AD1_PIN);
 }
 
 void motors_enable() {
@@ -326,7 +350,7 @@ int main() {
 
   sleep_ms(500);*/
 
-  motors_set_dir(1);
+  motors_set_dir(0);
   
   puts("Testing backward\n");
   
