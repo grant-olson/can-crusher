@@ -12,6 +12,9 @@ const uint LED_PIN = 25;
 #define UART_TX_PIN 6
 #define UART_RX_PIN 7
 
+const uint SUBSTEPS_PER_STEP = 8;
+const uint STEPS_PER_MM = 25;
+const uint SUBSTEPS_PER_MM = 8 * 25;
 
 const uint LEFT_ENABLE_PIN = 10;
 const uint LEFT_STEP_PIN = 11;
@@ -91,10 +94,11 @@ void motor_disable(motor_t *motor) {
   gpio_put(motor->enable_pin, 1);
 }
 
-void motor_step(motor_t *motor) {
+void motor_step(motor_t *motor, int step_duration_us) {
   gpio_put(motor->step_pin, 1);
-  sleep_us(250);
+  sleep_us(step_duration_us/2);
   gpio_put(motor->step_pin, 0);
+  sleep_us(step_duration_us/2);
 }
 
 void motor_set_dir(motor_t *motor, uint dir) {
@@ -337,9 +341,9 @@ void motors_set_dir(int dir) {
   motor_set_dir(&right_motor, dir);
 }
 
-void motors_step() {
-  motor_step(&left_motor);
-  motor_step(&right_motor);
+void motors_step(int step_duration_us) {
+  motor_step(&left_motor, step_duration_us);
+  motor_step(&right_motor, step_duration_us);
 }
 
 int motors_are_stalled() {
@@ -355,6 +359,31 @@ int motors_are_stalled() {
   }
 
   return result;
+}
+
+int motor_move_mm(bool left, bool right, int mm, int mm_per_second) {
+  if (mm < 0) {
+    mm = 0 - mm;
+    motors_set_dir(1);
+  } else {
+    motors_set_dir(0);
+  }
+  
+  int total_steps = SUBSTEPS_PER_MM * mm;
+  int step_duration_us = (1000000 / mm_per_second ) / (SUBSTEPS_PER_MM);
+
+  for(int i=0;i<total_steps;i++) {
+    if (left) {motor_step(&left_motor, step_duration_us);}
+    if (right) {motor_step(&right_motor, step_duration_us);}
+
+    int stall_result = motors_are_stalled();
+    if(stall_result) {
+      puts("STALL DETECTED. ABORT.");
+      return stall_result;
+    }
+  }
+
+  return 0;
 }
 
 int main() {
@@ -399,42 +428,20 @@ int main() {
   motors_enable();
 
   
-  /*    puts("Sending test packet to UART\n");
-
-  motor_control_register_write(&left_motor, 0x14, 0x00000001);
-  query_register(&left_motor, 0x2);
-
-  query_all_registers(&left_motor);
-  */
+  motor_move_mm(true, true, 30,10);
+  motor_move_mm(true, true, -30,10);
+  motor_move_mm(true, true, 30,20);
+  motor_move_mm(true, true, -30,20);
+  motor_move_mm(true, true, 30,30);
+  motor_move_mm(true, true, -30,30);
+  motor_move_mm(true, true, 30,40);
+  motor_move_mm(true, true, -30,40);
+  motor_move_mm(true, true, 30,50);
+  motor_move_mm(true, true, -30,50);
+  motor_move_mm(true, true, 30,60);
+  motor_move_mm(true, true, -30,60);
   
-  /*  puts("Testing forward...\n");
 
-
-  for(int i=0;i<3200;i++) {
-    sleep_us(500);
-    motors_step();
-    if(motors_are_stalled()) {
-      puts("STALL DETECTED. ABORT.");
-      break;
-    }
-  }
-   
-
-  sleep_ms(500);*/
-
-  motors_set_dir(1);
-  
-  puts("Testing backward\n");
-  
-  for(int i=0;i<3200;i++) {
-    motors_step();
-    sleep_us(500);
-
-    if(motors_are_stalled()) {
-      puts("STALL DETECTED. ABORT.");
-      break;
-    }
-  }
 
   motors_disable();
     
