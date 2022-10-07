@@ -371,14 +371,26 @@ int motor_move_mm(bool left, bool right, int mm, int mm_per_second) {
   
   int total_steps = SUBSTEPS_PER_MM * mm;
   int step_duration_us = (1000000 / mm_per_second ) / (SUBSTEPS_PER_MM);
-
+  int stall_result = 0;
+  
   for(int i=0;i<total_steps;i++) {
     if (left) {motor_step(&left_motor, step_duration_us);}
     if (right) {motor_step(&right_motor, step_duration_us);}
 
-    int stall_result = motors_are_stalled();
+    if (left) {
+      if (motor_is_stalled(&left_motor)) {
+	stall_result += left_motor.device_id;
+      }
+    }
+    
+    if (right) {
+      if (motor_is_stalled(&right_motor)) {
+	stall_result += right_motor.device_id;
+      }
+    }
+    
     if(stall_result) {
-      puts("STALL DETECTED. ABORT.");
+      printf("STALL DETECTED. ABORT. %d\n", stall_result);
       return stall_result;
     }
   }
@@ -428,7 +440,7 @@ int main() {
   motors_enable();
 
   
-  motor_move_mm(true, true, 30,10);
+  /*  motor_move_mm(true, true, 30,10);
   motor_move_mm(true, true, -30,10);
   motor_move_mm(true, true, 30,20);
   motor_move_mm(true, true, -30,20);
@@ -440,9 +452,34 @@ int main() {
   motor_move_mm(true, true, -30,50);
   motor_move_mm(true, true, 30,60);
   motor_move_mm(true, true, -30,60);
+  */
+
+  int stall_status;
   
+  motor_move_mm(true, true, 20, 10);
+  stall_status = motor_move_mm(true, true, -400, 10);
 
+  while (stall_status != 3) {
+    if (stall_status == 1) {
+      motor_move_mm(false, true, -5, 10);
+    }
 
+    if (stall_status == 2) {
+      motor_move_mm(true, false, -5, 10);
+    }
+
+    // clear old status
+    motors_disable();
+    sleep_ms(5000);
+    motors_enable();
+    sleep_ms(5000);
+
+    puts("Backing up...");
+    motor_move_mm(true, true, 30, 20);
+    puts("Re-homing");
+    stall_status = motor_move_mm(true, true, -25, 10);
+  } 
+  
   motors_disable();
     
   while(1) {};  
