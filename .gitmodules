@@ -1,0 +1,3 @@
+[submodule "kicad/can-crusher/exts/KiCad-RP-Pico"]
+	path = kicad/can-crusher/exts/KiCad-RP-Pico
+	url = https://github.com/ncarandini/KiCad-RP-Pico.git
