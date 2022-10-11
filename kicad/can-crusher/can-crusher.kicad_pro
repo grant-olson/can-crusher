@@ -365,7 +365,7 @@
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "",
+      "netlist": "exts/btt_tmc2209/",
       "specctra_dsn": "",
       "step": "",
       "vrml": ""
