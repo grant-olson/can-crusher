@@ -1,4 +1,4 @@
 (fp_lib_table
-  (lib (name "btt_tmc2209")(type "KiCad")(uri "${KIPRJMOD}/exts/btt_tmc2209/btt_tmc2209.pretty")(options "")(descr ""))
-  (lib (name "RPi_Pico")(type "KiCad")(uri "${KIPRJMOD}/exts/KiCad-RP-Pico/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
+  (lib (name "btt_tmc2209")(type "KiCad")(uri "${KIPRJMOD}/project_libs/btt_tmc2209/btt_tmc2209.pretty")(options "")(descr ""))
+  (lib (name "RPi_Pico")(type "KiCad")(uri "${KIPRJMOD}/project_libs/KiCad-RP-Pico/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
 )

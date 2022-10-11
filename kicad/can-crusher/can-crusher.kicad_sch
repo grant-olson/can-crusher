@@ -84,7 +84,7 @@
         )
       )
     )
-    (symbol "Connector:Conn_01x02_Male" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
+    (symbol "Connector:Conn_01x02_Male" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
       (property "Reference" "J" (id 0) (at 0 2.54 0)
         (effects (font (size 1.27 1.27)))
       )
@@ -1706,7 +1706,6 @@
     )
   )
 
-
   (junction (at 207.01 46.99) (diameter 0) (color 0 0 0 0)
     (uuid 04ecfaff-951f-414e-972b-7688431d4836)
   )
@@ -2809,12 +2808,12 @@
   )
 
   (symbol (lib_id "Connector:Conn_01x02_Male") (at 223.52 27.94 0) (mirror y) (unit 1)
-    (in_bom yes) (on_board yes) (fields_autoplaced)
+    (in_bom yes) (on_board yes)
     (uuid 467346d6-c529-4c94-bbb6-f1fa2d06a5d2)
-    (property "Reference" "J3" (id 0) (at 224.79 27.9399 0)
+    (property "Reference" "J3" (id 0) (at 227.33 24.13 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "Ext power" (id 1) (at 224.79 30.4799 0)
+    (property "Value" "Ext power" (id 1) (at 224.79 34.29 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" (id 2) (at 223.52 27.94 0)
