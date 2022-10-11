@@ -4,6 +4,14 @@
 
   (paper "A4")
 
+  (title_block
+    (title "Can Crusher Dev Board")
+    (date "2022-10-10")
+    (rev "1")
+    (company "https://github.com/grant-olson/can-crusher")
+    (comment 1 "Control board for the most technilogically advanced aluminum can crusher IN THE WORLD.")
+  )
+
   (lib_symbols
     (symbol "BTT_TMC2209_1" (in_bom yes) (on_board yes)
       (property "Reference" "U" (id 0) (at -1.27 -25.4 0)
@@ -1643,7 +1651,6 @@
       )
     )
   )
-
 
   (junction (at 207.01 46.99) (diameter 0) (color 0 0 0 0)
     (uuid 09e1f494-00df-4301-abc7-58cf58409b00)
