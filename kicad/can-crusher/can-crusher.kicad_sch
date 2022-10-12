@@ -2716,7 +2716,7 @@
     (uuid 352d29cf-338d-4da2-ac95-5b42ce304865)
     (property "Reference" "J2" (id 0) (at 47.625 15.24 0))
     (property "Value" "Control UART" (id 1) (at 47.625 17.78 0))
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" (id 2) (at 46.99 25.4 0)
+    (property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical" (id 2) (at 46.99 25.4 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 46.99 25.4 0)
@@ -3406,7 +3406,7 @@
     (uuid ee2482f5-d6df-4154-b36c-d36bee7d0ea9)
     (property "Reference" "J6" (id 0) (at 143.51 26.67 90))
     (property "Value" "Expansion Port" (id 1) (at 143.51 29.21 90))
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical" (id 2) (at 142.24 31.75 0)
+    (property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" (id 2) (at 142.24 31.75 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 142.24 31.75 0)
@@ -3524,7 +3524,7 @@
       (reference "J1") (unit 1) (value "Stepper Right") (footprint "Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical")
     )
     (path "/352d29cf-338d-4da2-ac95-5b42ce304865"
-      (reference "J2") (unit 1) (value "Control UART") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical")
+      (reference "J2") (unit 1) (value "Control UART") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical")
     )
     (path "/467346d6-c529-4c94-bbb6-f1fa2d06a5d2"
       (reference "J3") (unit 1) (value "Ext power") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
@@ -3536,7 +3536,7 @@
       (reference "J5") (unit 1) (value "Barrel_Jack") (footprint "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal")
     )
     (path "/ee2482f5-d6df-4154-b36c-d36bee7d0ea9"
-      (reference "J6") (unit 1) (value "Expansion Port") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical")
+      (reference "J6") (unit 1) (value "Expansion Port") (footprint "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical")
     )
     (path "/e9821278-bb88-4a3b-a615-62bf01f96eed"
       (reference "Q1") (unit 1) (value "IRF4905") (footprint "Package_TO_SOT_THT:TO-220-3_Vertical")
