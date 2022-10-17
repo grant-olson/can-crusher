@@ -12,6 +12,8 @@ const uint LED_PIN = 25;
 #define UART_TX_PIN 6
 #define UART_RX_PIN 7
 
+const uint ENABLE_12V_PIN = 22;
+
 const uint SUBSTEPS_PER_STEP = 8;
 const uint STEPS_PER_MM = 25;
 const uint SUBSTEPS_PER_MM = 8 * 25;
@@ -25,7 +27,7 @@ const uint LEFT_STALL_PIN = 21;
 
 const uint LEFT_DEVICE_ID = 1;
 
-
+const uint RIGHT_DIR_PIN= 10;
 const uint RIGHT_STEP_PIN = 11;
 const uint RIGHT_MS2_AD1_PIN = 12;
 const uint RIGHT_MS1_AD0_PIN = 13;
@@ -47,8 +49,6 @@ typedef struct {
 static motor_t left_motor;
 static motor_t right_motor;
 
-
-
 motor_t motor_init(motor_t *motor, 
 		   uint enable, uint step, uint dir,
 		   uint stall, uint device_id,
@@ -60,8 +60,14 @@ motor_t motor_init(motor_t *motor,
   motor->device_id = device_id;
   motor->ms1_ad0_pin = ms1_ad0;
   motor->ms2_ad1_pin = ms2_ad1;
+
   
-  // Immediately DISABLE the motor->
+  // Immediately DISABLE the 12 volt power supply.
+  gpio_init(ENABLE_12V_PIN);
+  gpio_set_dir(ENABLE_12V_PIN, GPIO_OUT);
+  gpio_put(ENABLE_12V_PIN, 0);
+
+  
   gpio_init(motor->enable_pin);
   gpio_set_dir(motor->enable_pin, GPIO_OUT);
   gpio_put(motor->enable_pin, 1);
@@ -431,6 +437,10 @@ int main() {
 
   puts("\x1b[2JInitialization complete.\n");
 
+  puts("Test 12V Enable...");
+  gpio_put(ENABLE_12V_PIN, 1);
+  
+  
   motor_control_enable();
 
   if (!motor_control_stallguard(&left_motor)) { puts("LEFT FAILED!");return -1;}
@@ -457,8 +467,9 @@ int main() {
 
   int stall_status;
   
-  motor_move_mm(true, true, 20, 10);
-  stall_status = motor_move_mm(true, true, -400, 10);
+  motor_move_mm(true, true, -30, 20);
+  motor_move_mm(true, true, 30, 20);
+  /* stall_status = motor_move_mm(true, true, -400, 10);
 
   while (stall_status != 3) {
     if (stall_status == 1) {
@@ -480,8 +491,10 @@ int main() {
     puts("Re-homing");
     stall_status = motor_move_mm(true, true, -25, 10);
   } 
+  */
   
   motors_disable();
+  gpio_put(ENABLE_12V_PIN, 0);
     
   while(1) {};  
 }
