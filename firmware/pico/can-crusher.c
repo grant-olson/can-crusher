@@ -16,21 +16,22 @@ const uint SUBSTEPS_PER_STEP = 8;
 const uint STEPS_PER_MM = 25;
 const uint SUBSTEPS_PER_MM = 8 * 25;
 
-const uint LEFT_ENABLE_PIN = 10;
-const uint LEFT_STEP_PIN = 11;
-const uint LEFT_DIR_PIN = 12;
-const uint LEFT_STALL_PIN = 13;
-const uint LEFT_MS1_AD0_PIN = 14;
-const uint LEFT_MS2_AD1_PIN = 15;
+const uint LEFT_DIR_PIN = 16;
+const uint LEFT_STEP_PIN = 17;
+const uint LEFT_MS2_AD1_PIN = 18;
+const uint LEFT_MS1_AD0_PIN = 19;
+const uint LEFT_ENABLE_PIN = 20;
+const uint LEFT_STALL_PIN = 21;
+
 const uint LEFT_DEVICE_ID = 1;
 
 
-const uint RIGHT_ENABLE_PIN = 21;
-const uint RIGHT_STEP_PIN = 20;
-const uint RIGHT_DIR_PIN = 19;
-const uint RIGHT_STALL_PIN = 18;
-const uint RIGHT_MS1_AD0_PIN = 17;
-const uint RIGHT_MS2_AD1_PIN = 16;
+const uint RIGHT_STEP_PIN = 11;
+const uint RIGHT_MS2_AD1_PIN = 12;
+const uint RIGHT_MS1_AD0_PIN = 13;
+const uint RIGHT_ENABLE_PIN = 14;
+const uint RIGHT_STALL_PIN = 15;
+
 const uint RIGHT_DEVICE_ID = 2;
 
 typedef struct {
