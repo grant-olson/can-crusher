@@ -9,6 +9,8 @@ pico_sdk_init()
 
 add_executable(can-crusher
   can-crusher.c
+  led.c
+  button.c
 )
 
 pico_enable_stdio_usb(can-crusher 1)

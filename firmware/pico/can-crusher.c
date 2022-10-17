@@ -3,8 +3,8 @@
 #include "hardware/gpio.h"
 #include "pico/binary_info.h"
 #include "hardware/uart.h"
-
-const uint LED_PIN = 25;
+#include "led.h"
+#include "button.h"
 
 #define UART_ID uart1 // 0 is logging
 #define BAUD_RATE 115200
@@ -35,6 +35,7 @@ const uint RIGHT_ENABLE_PIN = 14;
 const uint RIGHT_STALL_PIN = 15;
 
 const uint RIGHT_DEVICE_ID = 2;
+
 
 typedef struct {
   uint enable_pin;
@@ -407,7 +408,14 @@ int motor_move_mm(bool left, bool right, int mm, int mm_per_second) {
 
 int main() {
   bi_decl(bi_program_description("Firmware for can crusher."));
-  bi_decl(bi_1pin_with_name(LED_PIN, "On-board LED"));
+  
+  bi_decl(bi_1pin_with_name(LED_ONBOARD_PIN, "LED - Onboard"));
+  bi_decl(bi_1pin_with_name(LED_RED_PIN, "LED - RGB Red"));
+  bi_decl(bi_1pin_with_name(LED_GREEN_PIN, "LED - RGB Green"));
+  bi_decl(bi_1pin_with_name(LED_BLUE_PIN, "LED - RGB Blue"));
+
+  bi_decl(bi_1pin_with_name(USER_BUTTON_PIN, "User Interaction Button"));
+  
   bi_decl(bi_1pin_with_name(LEFT_ENABLE_PIN, "Left Stepper Enable - active low."));
   bi_decl(bi_1pin_with_name(LEFT_STEP_PIN, "Left Stepper Step"));
   bi_decl(bi_1pin_with_name(LEFT_DIR_PIN, "Left Direction Step"));
@@ -418,23 +426,16 @@ int main() {
   motors_init();
   motor_control_init();
   
-  gpio_init(LED_PIN);
-  gpio_set_dir(LED_PIN, GPIO_OUT);
-
-
+  led_init();
+  button_init();
+  
   sleep_ms(500);
   puts("=============================================================\n");
   puts("Can crusher initializing.\n");
 
-  // Blink 10 times over 5 seconds to provide visual indication
-  // that our code is actually running.
-  for(int i=0;i<10;i++) {
-    gpio_put(LED_PIN, 0);
-    sleep_ms(250);
-    gpio_put(LED_PIN, 1);
-    sleep_ms(250);
-  }
-
+  // Boot sequence
+  led_cycle();
+  
   puts("\x1b[2JInitialization complete.\n");
 
   puts("Test 12V Enable...");
@@ -450,26 +451,11 @@ int main() {
   motor_control_disable();
   motors_enable();
 
-  
-  /*  motor_move_mm(true, true, 30,10);
-  motor_move_mm(true, true, -30,10);
-  motor_move_mm(true, true, 30,20);
-  motor_move_mm(true, true, -30,20);
-  motor_move_mm(true, true, 30,30);
-  motor_move_mm(true, true, -30,30);
-  motor_move_mm(true, true, 30,40);
-  motor_move_mm(true, true, -30,40);
-  motor_move_mm(true, true, 30,50);
-  motor_move_mm(true, true, -30,50);
-  motor_move_mm(true, true, 30,60);
-  motor_move_mm(true, true, -30,60);
-  */
-
   int stall_status;
   
-  motor_move_mm(true, true, -30, 20);
+  motor_move_mm(true, true, -40, 20);
   motor_move_mm(true, true, 30, 20);
-  /* stall_status = motor_move_mm(true, true, -400, 10);
+  /*stall_status = motor_move_mm(true, true, -400, 10);
 
   while (stall_status != 3) {
     if (stall_status == 1) {
@@ -490,11 +476,19 @@ int main() {
     motor_move_mm(true, true, 30, 20);
     puts("Re-homing");
     stall_status = motor_move_mm(true, true, -25, 10);
-  } 
-  */
+    } */
   
   motors_disable();
   gpio_put(ENABLE_12V_PIN, 0);
+
+  while(1) {
+    if (button_status()) {
+      puts("BUTTON PRESSED");
+      led_display(LED_RED_MASK);
+      sleep_ms(250);
+      led_display(LED_NONE_MASK);
+    }
     
-  while(1) {};  
+    sleep_ms(250);
+  };  
 }
