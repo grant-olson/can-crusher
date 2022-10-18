@@ -165,6 +165,11 @@ void serial_process() {
 
     serial_putc(x);
 
+    if(x == 0x8) {
+      input_buffer_pos--;
+      continue;
+    }
+    
     if(x == '\r') {
       x = '\n'; // So we throw \n in our buffer
       serial_putc(x);
