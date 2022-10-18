@@ -64,14 +64,12 @@ int main() {
   led_display(LED_GREEN_MASK);
   motors_wake();
 
-  motors_move_mm(true, true, -30, 20);
-
+  motors_move_mm(true, true, 5, 10);
   motors_sleep();
-  sleep_ms(500);
+  sleep_ms(250);
   motors_wake();
+  motors_move_mm(true, true, -5, 10);
   
-  motors_move_mm(true, true, 30, 20);
-
   motors_sleep();
   while(1) {
     serial_process();
