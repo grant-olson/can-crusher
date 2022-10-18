@@ -5,10 +5,8 @@
 #include "hardware/uart.h"
 #include "led.h"
 #include "button.h"
+#include "power.h"
 #include "motor.h"
-
-const uint ENABLE_12V_PIN = 22;
-
 
 int main() {
   bi_decl(bi_program_description("Firmware for can crusher."));
@@ -25,13 +23,11 @@ int main() {
   bi_decl(bi_1pin_with_name(LEFT_DIR_PIN, "Left Direction Step"));
   bi_decl(bi_1pin_with_name(LEFT_STALL_PIN, "Left Stall Step"));
   
+  // Run first to immediately DISABLE the 12 volt power supply.
+  // Don't leave it to chance.
+  power_init();
+
   stdio_init_all();
-
-  // Immediately DISABLE the 12 volt power supply.
-  gpio_init(ENABLE_12V_PIN);
-  gpio_set_dir(ENABLE_12V_PIN, GPIO_OUT);
-  gpio_put(ENABLE_12V_PIN, 0);
-
   
   led_init();
   button_init();
@@ -44,9 +40,12 @@ int main() {
   led_cycle();
 
   puts("Enable 12V...");
-  gpio_put(ENABLE_12V_PIN, 1);
+  power_enable();
 
-  motors_init();
+  if(motors_init()) {
+    puts("Motor init failed. Aborting.\n");
+    return -1;
+  }
   
   puts("Initialization complete.\n");
   
@@ -58,7 +57,7 @@ int main() {
   // motors_home();
   
   motors_disable();
-  gpio_put(ENABLE_12V_PIN, 0);
+  power_disable();
 
   while(1) {
     if (button_status()) {
@@ -67,19 +66,21 @@ int main() {
       sleep_ms(250);
       led_display(LED_GREEN_MASK);
 
-      gpio_put(ENABLE_12V_PIN, 1);
+      power_enable();
       motors_enable();
       
       motors_move_mm(true, true, -30, 20);
       motors_move_mm(true, true, 30, 20);
 
       motors_disable();
-      gpio_put(ENABLE_12V_PIN, 0);
+      power_disable();
 
       led_display(LED_NONE_MASK);
 
     }
     
     sleep_ms(250);
-  };  
+  };
+
+  return 0;
 }

@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "pico/binary_info.h"
+#include "power.h"
 #include "motor.h"
 
 static motor_t left_motor;
@@ -288,6 +289,10 @@ int motors_init() {
              RIGHT_DIR_PIN, RIGHT_STALL_PIN, RIGHT_DEVICE_ID,
              RIGHT_MS1_AD0_PIN, RIGHT_MS2_AD1_PIN);
 
+  if (!power_is_enabled()) {
+    puts("Can't init motors without power enabled!");
+    res = -1;
+  }
   
   motor_control_enable();
 
@@ -297,7 +302,7 @@ int motors_init() {
   
   motor_control_disable();
 
-  return 0;
+  return res;
 }
 
 void motors_enable() {

@@ -12,6 +12,7 @@ add_executable(can-crusher
   led.c
   button.c
   motor.c
+  power.c
 )
 
 pico_enable_stdio_usb(can-crusher 1)
