@@ -6,6 +6,7 @@
 #include "hardware/uart.h"
 #include "string.h"
 #include "motor.h"
+#include "power.h"
 #include "serial.h"
 
 const int max_buffer_size = 1024;
@@ -135,6 +136,24 @@ int serial_cmd_sleep(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_power_enable(int index) {
+  if (serial_is_eol(index)) {
+    power_enable();
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
+int serial_cmd_power_disable(int index) {
+  if (serial_is_eol(index)) {
+    power_disable();
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -151,6 +170,10 @@ int serial_dispatch_cmd() {
     return serial_cmd_wake(index);
   } else if (!strcmp(word_buffer, "SLEEP")) {
     return serial_cmd_sleep(index);
+  } else if (!strcmp(word_buffer, "PWR_EN")) {
+    return serial_cmd_power_enable(index);
+  } else if (!strcmp(word_buffer, "PWR_DIS")) {
+    return serial_cmd_power_disable(index);
   }
 
   return ERR_UNKNOWN_CMD;
