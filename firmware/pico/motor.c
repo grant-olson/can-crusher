@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "pico/binary_info.h"
+#include "hardware/uart.h"
 #include "power.h"
 #include "motor.h"
 
@@ -71,7 +72,7 @@ int motor_is_stalled(motor_t *motor) {
 }
 
 void motor_control_init() {
-  uart_init(UART_ID, BAUD_RATE);
+  uart_init(MC_UART_ID, MC_BAUD_RATE);
   gpio_set_function(4, GPIO_FUNC_UART);
   gpio_set_function(5, GPIO_FUNC_UART);
 }
@@ -104,16 +105,16 @@ int motor_control_tx_data(motor_t *motor, char* buffer, int size) {
   
   motor_control_crc(buffer, size);
 
-  while(uart_is_readable(UART_ID)){ uart_getc(UART_ID); }
+  while(uart_is_readable(MC_UART_ID)){ uart_getc(MC_UART_ID); }
 
-  uart_write_blocking(UART_ID, buffer, size);
-  uart_tx_wait_blocking(UART_ID);
+  uart_write_blocking(MC_UART_ID, buffer, size);
+  uart_tx_wait_blocking(MC_UART_ID);
   
   // read back identical data, since we're sharing a uart line.
   char dummy_char;
   for (int i=0;i<size;i++) {
-    if (uart_is_readable(UART_ID)) {
-      dummy_char = uart_getc(UART_ID);
+    if (uart_is_readable(MC_UART_ID)) {
+      dummy_char = uart_getc(MC_UART_ID);
       if (dummy_char != buffer[i]) {
         printf("CHAR %d DIDN'T MATCH. Expected 0x%x, Got 0x%x\n", buffer[i], dummy_char);
         return -1;
@@ -138,12 +139,12 @@ int motor_control_register_read(motor_t *motor, uint8_t reg, uint32_t *result) {
     return -1;
   }
 
-  if(!uart_is_readable_within_us(UART_ID, 10000)) {
+  if(!uart_is_readable_within_us(MC_UART_ID, 10000)) {
     puts("NO RESPONSE!");
     return -1;
   }
   
-  uart_read_blocking(UART_ID, result_buffer, 8);
+  uart_read_blocking(MC_UART_ID, result_buffer, 8);
  
   char result_crc = result_buffer[7];
   motor_control_crc(result_buffer, 8);

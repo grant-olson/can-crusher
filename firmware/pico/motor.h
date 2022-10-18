@@ -3,10 +3,8 @@
 
 
 // Specifically, the UART that we use to set STALLGUARD
-#define UART_ID uart1 
-#define BAUD_RATE 115200
-#define UART_TX_PIN 6
-#define UART_RX_PIN 7
+#define MC_UART_ID uart1 
+#define MC_BAUD_RATE 115200
 
 #define SUBSTEPS_PER_STEP 8
 #define STEPS_PER_MM 25

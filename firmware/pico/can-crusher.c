@@ -2,11 +2,11 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "pico/binary_info.h"
-#include "hardware/uart.h"
 #include "led.h"
 #include "button.h"
 #include "power.h"
 #include "motor.h"
+#include "serial.h"
 
 int main() {
   bi_decl(bi_program_description("Firmware for can crusher."));
@@ -45,6 +45,11 @@ int main() {
     puts("button_init() failed! ABORTING!");
     return -1;
   }
+
+  if(serial_init()) {
+    puts("serial_init() failed! ABORTING!");
+    return -1;
+  }
   
   puts("Enable 12V...");
   power_enable();
@@ -68,6 +73,7 @@ int main() {
   power_disable();
 
   while(1) {
+    serial_process();
     if (button_status()) {
       puts("BUTTON PRESSED");
       led_display(LED_RED_MASK);
