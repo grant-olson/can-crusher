@@ -39,13 +39,14 @@ typedef struct {
   uint ms2_ad1_pin;
 } motor_t;
 
-void motors_enable();
-void motors_disable();
 int motors_move_mm(bool left, bool right, int mm, int mm_per_second);
 int motors_init();
 void motors_home();
 
 void motors_stallguard_enable();
 void motors_stallguard_disable();
+
+int motors_wake();
+int motors_sleep();
 
 #endif

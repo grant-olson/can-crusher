@@ -62,38 +62,20 @@ int main() {
   // Boot sequence
   puts("Initialization complete.\n");
   led_display(LED_GREEN_MASK);
-  motors_enable();
+  motors_wake();
 
   motors_move_mm(true, true, -30, 20);
+
+  motors_sleep();
+  sleep_ms(500);
+  motors_wake();
+  
   motors_move_mm(true, true, 30, 20);
 
-  // motors_home();
-  
-  motors_disable();
-  power_disable();
-
+  motors_sleep();
   while(1) {
     serial_process();
-    if (button_status()) {
-      puts("BUTTON PRESSED");
-      led_display(LED_RED_MASK);
-      sleep_ms(250);
-      led_display(LED_GREEN_MASK);
-
-      power_enable();
-      motors_enable();
-      
-      motors_move_mm(true, true, -30, 20);
-      motors_move_mm(true, true, 30, 20);
-
-      motors_disable();
-      power_disable();
-
-      led_display(LED_NONE_MASK);
-
-    }
-    
-    sleep_ms(250);
+    sleep_ms(100);
   };
 
   return 0;

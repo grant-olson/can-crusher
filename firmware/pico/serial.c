@@ -61,6 +61,7 @@ int serial_extract_next_word(int index) {
 #define ERR_TOO_MANY_ARGS 100
 #define ERR_TOO_FEW_ARGS 101
 #define ERR_UNKNOWN_CMD 102
+#define ERR_EXECUTION_FAILED 103
 
 bool serial_is_eol(int index) {
   char delimiter = input_buffer[index];
@@ -116,6 +117,24 @@ int serial_cmd_move(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_wake(int index) {
+  if (serial_is_eol(index)) {
+    if(motors_wake()) return ERR_EXECUTION_FAILED;
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
+int serial_cmd_sleep(int index) {
+  if (serial_is_eol(index)) {
+    if (motors_sleep()) return ERR_EXECUTION_FAILED;
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -128,6 +147,10 @@ int serial_dispatch_cmd() {
     return serial_cmd_echo(index);
   } else if (!strcmp(word_buffer, "MOVE")) {
     return serial_cmd_move(index);
+  } else if (!strcmp(word_buffer, "WAKE")) {
+    return serial_cmd_wake(index);
+  } else if (!strcmp(word_buffer, "SLEEP")) {
+    return serial_cmd_sleep(index);
   }
 
   return ERR_UNKNOWN_CMD;

@@ -11,6 +11,8 @@ static motor_t right_motor;
 
 static bool motor_stallguard_enabled = true;
 
+static bool motor_is_awake = false;
+
 motor_t motor_init(motor_t *motor, 
                    uint enable, uint step, uint dir,
                    uint stall, uint device_id,
@@ -37,6 +39,7 @@ motor_t motor_init(motor_t *motor,
 
   gpio_init(motor->stall_pin);
   gpio_set_dir(motor->stall_pin, GPIO_IN);
+  gpio_set_pulls(motor->stall_pin, false, true);
   
   gpio_init(motor->ms1_ad0_pin);
   gpio_set_dir(motor->ms1_ad0_pin, GPIO_OUT);
@@ -223,7 +226,7 @@ bool motor_control_stallguard(motor_t *motor) {
   }
 
   motor_control_register_write(motor, 0x14, 0xFFFFF);
-  motor_control_register_write(motor, 0x40, 0x30);
+  motor_control_register_write(motor, 0x40, 0x60);
 
   if (motor_control_register_read(motor, 0x2, &motor_write_counter_finish)) {
     puts("Couldn't read counter FINISH");
@@ -290,18 +293,6 @@ int motors_init() {
              RIGHT_DIR_PIN, RIGHT_STALL_PIN, RIGHT_DEVICE_ID,
              RIGHT_MS1_AD0_PIN, RIGHT_MS2_AD1_PIN);
 
-  if (!power_is_enabled()) {
-    puts("Can't init motors without power enabled!");
-    res = -1;
-  }
-  
-  motor_control_enable();
-
-  if (!motor_control_stallguard(&left_motor)) { puts("LEFT FAILED!");res = -1;}
-
-  if (!motor_control_stallguard(&right_motor)) { puts("RIGHT FAILED!"); res = -1;}
-  
-  motor_control_disable();
 
   return res;
 }
@@ -314,6 +305,37 @@ void motors_enable() {
 void motors_disable() {
   motor_disable(&left_motor);
   motor_disable(&right_motor);
+}
+
+int motors_wake() {
+  int res = 0;
+  
+  motors_disable();
+  
+ if (!power_is_enabled()) {
+    puts("Can't init motors without power enabled!");
+    return -1;
+  }
+  
+  motor_control_enable();
+
+  if (!motor_control_stallguard(&left_motor)) { puts("LEFT FAILED!");res = -1;}
+
+  if (!motor_control_stallguard(&right_motor)) { puts("RIGHT FAILED!"); res = -1;}
+  
+  motor_control_disable();
+
+  motors_enable();
+
+  motor_is_awake = true;
+  return res;
+}
+
+int motors_sleep() {
+  motors_disable();
+
+  motor_is_awake = false;
+  return 0;
 }
 
 void motors_set_dir(int dir) {
@@ -353,23 +375,43 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   int step_duration_us = (1000000 / mm_per_second ) / (SUBSTEPS_PER_MM);
   int stall_result = 0;
 
+  int left_stallguard_debounce = 0;
+  int right_stallguard_debounce = 0;
+  
   if (left && right) {step_duration_us = step_duration_us / 2;};
+
+  motors_disable();
+  motors_enable();
   
   for(int i=0;i<total_steps;i++) {
     if (left) {motor_step(&left_motor, step_duration_us);}
     if (right) {motor_step(&right_motor, step_duration_us);}
 
+    // This seems fishy, but we need it or we'll always seem
+    // to be stalled after a pause in movement.
+    // Review datasheet later to see if we can figure out a more
+    // correct way.
     if (motor_stallguard_enabled) {
       if (left) {
         if (motor_is_stalled(&left_motor)) {
-          stall_result += left_motor.device_id;
-        }
+          left_stallguard_debounce++;
+	  if (left_stallguard_debounce > 16) {
+	    stall_result += left_motor.device_id;
+	  }
+        } else {
+	  left_stallguard_debounce = 0;
+	}
       }
     
       if (right) {
         if (motor_is_stalled(&right_motor)) {
-          stall_result += right_motor.device_id;
-        }
+          right_stallguard_debounce++;
+	  if (right_stallguard_debounce > 16) {
+	    stall_result += right_motor.device_id;
+	  }
+        } else {
+	  right_stallguard_debounce = 0;
+	}
       }
     }
     
