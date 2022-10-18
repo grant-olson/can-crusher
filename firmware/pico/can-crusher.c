@@ -32,7 +32,6 @@ int main() {
   gpio_set_dir(ENABLE_12V_PIN, GPIO_OUT);
   gpio_put(ENABLE_12V_PIN, 0);
 
-  motors_init();
   
   led_init();
   button_init();
@@ -43,12 +42,13 @@ int main() {
 
   // Boot sequence
   led_cycle();
-  
-  puts("\x1b[2JInitialization complete.\n");
 
   puts("Enable 12V...");
   gpio_put(ENABLE_12V_PIN, 1);
+
+  motors_init();
   
+  puts("Initialization complete.\n");
   
   motors_enable();
 

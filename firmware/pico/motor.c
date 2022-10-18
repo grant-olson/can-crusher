@@ -278,6 +278,9 @@ void query_all_registers(motor_t *motor) {
 }
 
 int motors_init() {
+  int res = 0;
+  motor_control_init();
+
   motor_init(&left_motor, LEFT_ENABLE_PIN, LEFT_STEP_PIN, 
              LEFT_DIR_PIN, LEFT_STALL_PIN, LEFT_DEVICE_ID,
              LEFT_MS1_AD0_PIN, LEFT_MS2_AD1_PIN);
@@ -285,13 +288,12 @@ int motors_init() {
              RIGHT_DIR_PIN, RIGHT_STALL_PIN, RIGHT_DEVICE_ID,
              RIGHT_MS1_AD0_PIN, RIGHT_MS2_AD1_PIN);
 
-  motor_control_init();
   
   motor_control_enable();
 
-  if (!motor_control_stallguard(&left_motor)) { puts("LEFT FAILED!");return -1;}
+  if (!motor_control_stallguard(&left_motor)) { puts("LEFT FAILED!");res = -1;}
 
-  if (!motor_control_stallguard(&right_motor)) { puts("RIGHT FAILED!"); return -1;}
+  if (!motor_control_stallguard(&right_motor)) { puts("RIGHT FAILED!"); res = -1;}
   
   motor_control_disable();
 
@@ -344,6 +346,8 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   int total_steps = SUBSTEPS_PER_MM * mm;
   int step_duration_us = (1000000 / mm_per_second ) / (SUBSTEPS_PER_MM);
   int stall_result = 0;
+
+  if (left && right) {step_duration_us = step_duration_us / 2;};
   
   for(int i=0;i<total_steps;i++) {
     if (left) {motor_step(&left_motor, step_duration_us);}
