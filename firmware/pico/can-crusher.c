@@ -46,7 +46,7 @@ int main() {
   
   puts("\x1b[2JInitialization complete.\n");
 
-  puts("Test 12V Enable...");
+  puts("Enable 12V...");
   gpio_put(ENABLE_12V_PIN, 1);
   
   
