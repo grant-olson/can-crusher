@@ -6,5 +6,6 @@
 
 int serial_init();
 void serial_process();
+void serial_flush();
 
 #endif

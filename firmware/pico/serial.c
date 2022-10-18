@@ -157,6 +157,12 @@ int serial_dispatch_cmd() {
   
 }
 
+void serial_flush() {
+  while(uart_is_readable(SERIAL_UART_ID)) {
+    char x = uart_getc(SERIAL_UART_ID);
+  }
+}
+
 void serial_process() {
   int result;
   

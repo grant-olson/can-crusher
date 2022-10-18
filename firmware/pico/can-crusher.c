@@ -71,6 +71,8 @@ int main() {
   motors_move_mm(true, true, -5, 10);
   
   motors_sleep();
+  
+  serial_flush();
   while(1) {
     serial_process();
     sleep_ms(100);
