@@ -20,8 +20,10 @@ bool power_is_enabled() {
   return is_enabled;
 }
 
-void power_init() {
+int power_init() {
   gpio_init(ENABLE_12V_PIN);
   gpio_set_dir(ENABLE_12V_PIN, GPIO_OUT);
   power_disable();
+
+  return 0;
 }

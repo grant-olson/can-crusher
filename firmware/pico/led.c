@@ -4,7 +4,7 @@
 #include "pico/binary_info.h"
 #include "led.h"
 
-void led_init() {
+int led_init() {
   gpio_init(LED_ONBOARD_PIN);
   gpio_set_dir(LED_ONBOARD_PIN, GPIO_OUT);
 
@@ -19,6 +19,10 @@ void led_init() {
   gpio_init(LED_BLUE_PIN);
   gpio_set_dir(LED_BLUE_PIN, GPIO_OUT);
   gpio_put(LED_BLUE_PIN, 0);
+
+  led_cycle();
+
+  return 0;
 }
 
 void led_display(uint mask) {

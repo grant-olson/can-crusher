@@ -3,7 +3,7 @@
 
 #define USER_BUTTON_PIN 9
 
-void button_init();
+int button_init();
 bool button_status();
 
 #endif

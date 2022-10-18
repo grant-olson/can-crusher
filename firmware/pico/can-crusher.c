@@ -22,33 +22,41 @@ int main() {
   bi_decl(bi_1pin_with_name(LEFT_STEP_PIN, "Left Stepper Step"));
   bi_decl(bi_1pin_with_name(LEFT_DIR_PIN, "Left Direction Step"));
   bi_decl(bi_1pin_with_name(LEFT_STALL_PIN, "Left Stall Step"));
+
+  stdio_init_all();
+
+  puts("STARTING INITIALIZATION");
   
   // Run first to immediately DISABLE the 12 volt power supply.
   // Don't leave it to chance.
-  power_init();
+  if(power_init()) {
+    puts("power_init() failed! ABORTING!");
+    return -1;
+  }
 
-  stdio_init_all();
-  
-  led_init();
-  button_init();
-  
   sleep_ms(500);
-  puts("=============================================================\n");
-  puts("Can crusher initializing.\n");
-
-  // Boot sequence
-  led_cycle();
-
+  
+  if(led_init()) {
+    puts("led_init() failed! ABORTING!");
+    return -1;
+  }
+  
+  if(button_init()) {
+    puts("button_init() failed! ABORTING!");
+    return -1;
+  }
+  
   puts("Enable 12V...");
   power_enable();
 
   if(motors_init()) {
-    puts("Motor init failed. Aborting.\n");
+    puts("motors_init() failed! ABORTING!");
     return -1;
   }
   
+  // Boot sequence
   puts("Initialization complete.\n");
-  
+  led_display(LED_GREEN_MASK);
   motors_enable();
 
   motors_move_mm(true, true, -30, 20);

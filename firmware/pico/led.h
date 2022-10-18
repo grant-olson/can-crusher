@@ -12,7 +12,7 @@
 #define LED_GREEN_MASK 4
 #define LED_BLUE_MASK 8
 
-void led_init();
+int led_init();
 void led_display(uint mask);
 void led_cycle();
 
