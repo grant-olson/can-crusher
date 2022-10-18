@@ -430,25 +430,21 @@ void motors_home() {
 
   while (stall_status != 3) {
     if (stall_status == 1) {
-      motors_move_mm(false, true, -5, 10);
+      motors_move_mm(false, true, -10, 10);
     }
     
 
     if (stall_status == 2) {
-      motors_move_mm(true, false, -5, 10);
+      motors_move_mm(true, false, -10, 10);
     }
 
-    // clear old status
-    motors_disable();
-    sleep_ms(5000);
-    motors_enable();
-    sleep_ms(5000);
-
     puts("Backing up...");
-    motors_move_mm(true, true, 30, 20);
+    motors_move_mm(true, true, 25, 20);
     puts("Re-homing");
-    stall_status = motors_move_mm(true, true, -25, 10);
+    stall_status = motors_move_mm(true, true, -30, 10);
   }
+
+  motors_move_mm(true, true, 100, 20);
 }
 
 void motors_stallguard_disable() {
