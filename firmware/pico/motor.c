@@ -427,12 +427,16 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
 
   // In case we stalled, only modify position by
   // Actual movement.
-  double mm_moved = (double)step / (double)SUBSTEPS_PER_MM;
+  // But if we haven't homed, keep motor position at -1
+  // so we know we're not homed.
+  if(motor_position >= 0) {
+    double mm_moved = (double)step / (double)SUBSTEPS_PER_MM;
 
-  if (is_dir_down) {
-    motor_position -= mm_moved;
-  } else {
-    motor_position += mm_moved;
+    if (is_dir_down) {
+      motor_position -= mm_moved;
+    } else {
+      motor_position += mm_moved;
+    }
   }
   
   return stall_result;
