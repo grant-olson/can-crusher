@@ -51,4 +51,6 @@ int motors_sleep();
 
 bool motors_is_awake();
 
+double motors_get_position();
+
 #endif

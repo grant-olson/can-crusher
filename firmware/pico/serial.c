@@ -205,6 +205,27 @@ int serial_cmd_power_disable(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_home(int index) {
+  if (serial_is_eol(index)) {
+    if (!motors_is_awake()) {return ERR_MOTORS_SLEEPING;}
+    if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
+
+    motors_home();
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
+int serial_cmd_position(int index) {
+  if (serial_is_eol(index)) {
+    serial_printf("POSITION: %0.2f\r\n", motors_get_position());
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -229,6 +250,10 @@ int serial_dispatch_cmd() {
     return serial_cmd_power_enable(index);
   } else if (!strcmp(word_buffer, "PWR_DIS")) {
     return serial_cmd_power_disable(index);
+  } else if (!strcmp(word_buffer, "HOME")) {
+    return serial_cmd_home(index);
+  } else if (!strcmp(word_buffer, "POSITION?")) {
+    return serial_cmd_position(index);
   }
 
   return ERR_UNKNOWN_CMD;

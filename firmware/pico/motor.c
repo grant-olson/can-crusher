@@ -13,6 +13,8 @@ static bool motor_stallguard_enabled = true;
 
 static bool motor_awake = false;
 
+static double motor_position = -1;
+
 motor_t motor_init(motor_t *motor, 
                    uint enable, uint step, uint dir,
                    uint stall, uint device_id,
@@ -364,7 +366,10 @@ int motors_are_stalled() {
 }
 
 int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
-  if (mm < 0) {
+  int res = 0;
+  bool is_dir_down = (mm < 0);
+  
+  if (is_dir_down) {
     mm = 0 - mm;
     motors_set_dir(1);
   } else {
@@ -380,7 +385,8 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   
   if (left && right) {step_duration_us = step_duration_us / 2;};
 
-  for(int i=0;i<total_steps;i++) {
+  int step; // Capture index for later use
+  for(step=0;step<total_steps;step++) {
     if (left) {motor_step(&left_motor, step_duration_us);}
     if (right) {motor_step(&right_motor, step_duration_us);}
 
@@ -392,7 +398,7 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
       if (left) {
         if (motor_is_stalled(&left_motor)) {
           left_stallguard_debounce++;
-	  if (left_stallguard_debounce > 16) {
+	  if (step > 16) {
 	    stall_result += left_motor.device_id;
 	  }
         } else {
@@ -403,7 +409,7 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
       if (right) {
         if (motor_is_stalled(&right_motor)) {
           right_stallguard_debounce++;
-	  if (right_stallguard_debounce > 16) {
+	  if (step > 16) {
 	    stall_result += right_motor.device_id;
 	  }
         } else {
@@ -414,11 +420,22 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
     
     if(stall_result) {
       printf("STALL DETECTED. ABORT. %d\n", stall_result);
-      return stall_result;
+      res = stall_result;
+      break;
     }
   }
 
-  return 0;
+  // In case we stalled, only modify position by
+  // Actual movement.
+  double mm_moved = (double)step / (double)SUBSTEPS_PER_MM;
+
+  if (is_dir_down) {
+    motor_position -= mm_moved;
+  } else {
+    motor_position += mm_moved;
+  }
+  
+  return stall_result;
 }
 
 void motors_home() {
@@ -441,7 +458,10 @@ void motors_home() {
     stall_status = motors_move_mm(true, true, -30, 10);
   }
 
+  motor_position = 0;
+  
   motors_move_mm(true, true, 100, 20);
+
 }
 
 void motors_stallguard_disable() {
@@ -454,4 +474,8 @@ void motors_stallguard_enable() {
 
 bool motors_is_awake() {
   return motor_awake;
+}
+
+double motors_get_position() {
+  return motor_position;
 }
