@@ -49,4 +49,6 @@ void motors_stallguard_disable();
 int motors_wake();
 int motors_sleep();
 
+bool motors_is_awake();
+
 #endif

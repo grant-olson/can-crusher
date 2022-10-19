@@ -11,7 +11,7 @@ static motor_t right_motor;
 
 static bool motor_stallguard_enabled = true;
 
-static bool motor_is_awake = false;
+static bool motor_awake = false;
 
 motor_t motor_init(motor_t *motor, 
                    uint enable, uint step, uint dir,
@@ -327,14 +327,14 @@ int motors_wake() {
 
   motors_enable();
 
-  motor_is_awake = true;
+  motor_awake = true;
   return res;
 }
 
 int motors_sleep() {
   motors_disable();
 
-  motor_is_awake = false;
+  motor_awake = false;
   return 0;
 }
 
@@ -380,9 +380,6 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   
   if (left && right) {step_duration_us = step_duration_us / 2;};
 
-  motors_disable();
-  motors_enable();
-  
   for(int i=0;i<total_steps;i++) {
     if (left) {motor_step(&left_motor, step_duration_us);}
     if (right) {motor_step(&right_motor, step_duration_us);}
@@ -453,4 +450,8 @@ void motors_stallguard_disable() {
 
 void motors_stallguard_enable() {
   motor_stallguard_enabled = true;
+}
+
+bool motors_is_awake() {
+  return motor_awake;
 }

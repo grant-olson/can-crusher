@@ -64,6 +64,8 @@ int serial_extract_next_word(int index) {
 #define ERR_UNKNOWN_CMD 102
 #define ERR_EXECUTION_FAILED 103
 #define ERR_OUT_OF_BOUNDS 104
+#define ERR_MOTORS_SLEEPING 105
+#define ERR_NO_12V_POWER 106
 
 bool serial_is_eol(int index) {
   char delimiter = input_buffer[index];
@@ -121,6 +123,9 @@ int serial_cmd_move(int index) {
   int result = serial_extract_move_params(index, &mm_to_move, &mm_per_sec);
 
   if (result != ERR_OK) {return result;}
+
+  if (!motors_is_awake()) {return ERR_MOTORS_SLEEPING;}
+  if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
   
   printf("MOVE %d %d\n", mm_to_move, mm_per_sec);
   motors_move_mm(true, true, mm_to_move, mm_per_sec);
@@ -137,6 +142,9 @@ int serial_cmd_move_left(int index) {
   // need to be gentle when syncing
   if (mm_to_move > 5) { return ERR_OUT_OF_BOUNDS; } 
   
+  if (!motors_is_awake()) {return ERR_MOTORS_SLEEPING;}
+  if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
+
   printf("MOVE_LEFT %d %d\n", mm_to_move, mm_per_sec);
   motors_move_mm(true, false, mm_to_move, mm_per_sec);
   
@@ -152,6 +160,9 @@ int serial_cmd_move_right(int index) {
   // need to be gentle when syncing
   if (mm_to_move > 5) { return ERR_OUT_OF_BOUNDS; } 
   
+  if (!motors_is_awake()) {return ERR_MOTORS_SLEEPING;}
+  if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
+
   printf("MOVE_RIGHT %d %d\n", mm_to_move, mm_per_sec);
   motors_move_mm(false, true, mm_to_move, mm_per_sec);
   

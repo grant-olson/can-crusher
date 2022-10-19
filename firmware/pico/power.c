@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "pico/binary_info.h"
+#include "motor.h"
 #include "power.h"
 
 static bool is_enabled = false;
@@ -12,6 +13,7 @@ void power_enable() {
 }
 
 void power_disable() {
+  motors_sleep(); // Just to force state update
   gpio_put(ENABLE_12V_PIN, 0);
   is_enabled = false;
 }
