@@ -63,6 +63,7 @@ int serial_extract_next_word(int index) {
 #define ERR_TOO_FEW_ARGS 101
 #define ERR_UNKNOWN_CMD 102
 #define ERR_EXECUTION_FAILED 103
+#define ERR_OUT_OF_BOUNDS 104
 
 bool serial_is_eol(int index) {
   char delimiter = input_buffer[index];
@@ -91,14 +92,14 @@ int serial_cmd_echo(int index) {
   }
 }
 
-int serial_cmd_move(int index) {
+int serial_extract_move_params(int index, int* mm_to_move, int* mm_per_sec) {
   if (serial_is_eol(index)) {
     return ERR_TOO_FEW_ARGS;
   }
 
   index++;
   index = serial_extract_next_word(index);
-  int mm_to_move = atoi(word_buffer);
+  *mm_to_move = atoi(word_buffer);
 
   if (serial_is_eol(index)) {
     return ERR_TOO_FEW_ARGS;
@@ -106,14 +107,53 @@ int serial_cmd_move(int index) {
   
   index++;
   index = serial_extract_next_word(index);
-  int mm_per_sec = atoi(word_buffer);
+  *mm_per_sec = atoi(word_buffer);
 
   if (!serial_is_eol(index)) {
     return ERR_TOO_MANY_ARGS;
   }
 
+  return ERR_OK;
+}
+
+int serial_cmd_move(int index) {
+  int mm_to_move, mm_per_sec;
+  int result = serial_extract_move_params(index, &mm_to_move, &mm_per_sec);
+
+  if (result != ERR_OK) {return result;}
+  
   printf("MOVE %d %d\n", mm_to_move, mm_per_sec);
   motors_move_mm(true, true, mm_to_move, mm_per_sec);
+  
+  return ERR_OK;
+}
+
+int serial_cmd_move_left(int index) {
+  int mm_to_move, mm_per_sec;
+  int result = serial_extract_move_params(index, &mm_to_move, &mm_per_sec);
+
+  if (result != ERR_OK) {return result;}
+
+  // need to be gentle when syncing
+  if (mm_to_move > 5) { return ERR_OUT_OF_BOUNDS; } 
+  
+  printf("MOVE_LEFT %d %d\n", mm_to_move, mm_per_sec);
+  motors_move_mm(true, false, mm_to_move, mm_per_sec);
+  
+  return ERR_OK;
+}
+
+int serial_cmd_move_right(int index) {
+  int mm_to_move, mm_per_sec;
+  int result = serial_extract_move_params(index, &mm_to_move, &mm_per_sec);
+
+  if (result != ERR_OK) {return result;}
+  
+  // need to be gentle when syncing
+  if (mm_to_move > 5) { return ERR_OUT_OF_BOUNDS; } 
+  
+  printf("MOVE_RIGHT %d %d\n", mm_to_move, mm_per_sec);
+  motors_move_mm(false, true, mm_to_move, mm_per_sec);
   
   return ERR_OK;
 }
@@ -166,6 +206,10 @@ int serial_dispatch_cmd() {
     return serial_cmd_echo(index);
   } else if (!strcmp(word_buffer, "MOVE")) {
     return serial_cmd_move(index);
+  } else if (!strcmp(word_buffer, "MOVE_LEFT")) {
+    return serial_cmd_move_left(index);
+  } else if (!strcmp(word_buffer, "MOVE_RIGHT")) {
+    return serial_cmd_move_right(index);
   } else if (!strcmp(word_buffer, "WAKE")) {
     return serial_cmd_wake(index);
   } else if (!strcmp(word_buffer, "SLEEP")) {
