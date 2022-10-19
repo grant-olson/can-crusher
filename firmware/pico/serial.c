@@ -264,9 +264,9 @@ int serial_dispatch_cmd() {
     return serial_cmd_wake(index);
   } else if (!strcmp(word_buffer, "SLEEP")) {
     return serial_cmd_sleep(index);
-  } else if (!strcmp(word_buffer, "PWR_EN")) {
+  } else if (!strcmp(word_buffer, "POWER_ON")) {
     return serial_cmd_power_enable(index);
-  } else if (!strcmp(word_buffer, "PWR_DIS")) {
+  } else if (!strcmp(word_buffer, "POWER_OFF")) {
     return serial_cmd_power_disable(index);
   } else if (!strcmp(word_buffer, "HOME")) {
     return serial_cmd_home(index);
@@ -296,8 +296,6 @@ void serial_process() {
     if (x >= 0x0 && x <= 0x1F &&
 	x != '\r' && x != '\n' && x != 0x8)
       {continue;}
-    
-
     
     serial_putc(x);
 
