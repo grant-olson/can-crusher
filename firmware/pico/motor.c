@@ -380,9 +380,6 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   int step_duration_us = (1000000 / mm_per_second ) / (SUBSTEPS_PER_MM);
   int stall_result = 0;
 
-  int left_stallguard_debounce = 0;
-  int right_stallguard_debounce = 0;
-  
   if (left && right) {step_duration_us = step_duration_us / 2;};
 
   int step; // Capture index for later use
@@ -391,30 +388,22 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
     if (right) {motor_step(&right_motor, step_duration_us);}
 
     // This seems fishy, but we need it or we'll always seem
-    // to be stalled after a pause in movement.
+    // to be stalled after a pause in movement. Wait two full
+    // steps before enforcing stallguard.
+    //
     // Review datasheet later to see if we can figure out a more
     // correct way.
     if (motor_stallguard_enabled) {
-      if (left) {
-        if (motor_is_stalled(&left_motor)) {
-          left_stallguard_debounce++;
-	  if (step > 16) {
-	    stall_result += left_motor.device_id;
-	  }
-        } else {
-	  left_stallguard_debounce = 0;
-	}
+      if (left && motor_is_stalled(&left_motor)) {
+        if (step > 16) {
+          stall_result += left_motor.device_id;
+        }
       }
     
-      if (right) {
-        if (motor_is_stalled(&right_motor)) {
-          right_stallguard_debounce++;
-	  if (step > 16) {
-	    stall_result += right_motor.device_id;
-	  }
-        } else {
-	  right_stallguard_debounce = 0;
-	}
+      if (right && motor_is_stalled(&right_motor)) {
+        if (step > 16) {
+          stall_result += right_motor.device_id;
+        }
       }
     }
     
