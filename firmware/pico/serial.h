@@ -12,7 +12,10 @@
 #define ERR_OUT_OF_BOUNDS 104
 #define ERR_MOTORS_SLEEPING 105
 #define ERR_NO_12V_POWER 106
-#define ERR_STALL 107
+#define ERR_STALL_LEFT 107
+#define ERR_STALL_RIGHT 108
+#define ERR_STALL_BOTH 109
+#define ERR_STALL_UNKNOWN 110
 
 int serial_init();
 void serial_process();

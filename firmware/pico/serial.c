@@ -108,6 +108,28 @@ int serial_extract_move_params(int index, int* mm_to_move, int* mm_per_sec) {
   return ERR_OK;
 }
 
+int serial_cmd_move_handle_stall(int move_result) {
+  int res = ERR_OK;
+  switch (move_result) {
+  case 0:
+    res = ERR_OK;
+    break;
+  case 1:
+    res = ERR_STALL_LEFT;
+    break;
+  case 2:
+    res = ERR_STALL_RIGHT;
+    break;
+  case 3:
+    res = ERR_STALL_BOTH;
+    break;
+  default:
+    res = ERR_STALL_UNKNOWN;
+  }
+
+  return res;
+}
+
 int serial_cmd_move(int index) {
   int mm_to_move, mm_per_sec;
   int result = serial_extract_move_params(index, &mm_to_move, &mm_per_sec);
@@ -119,9 +141,7 @@ int serial_cmd_move(int index) {
   
   printf("MOVE %d %d\n", mm_to_move, mm_per_sec);
   int move_result = motors_move_mm(true, true, mm_to_move, mm_per_sec);
-  if (move_result) { return ERR_STALL; }
-  
-  return ERR_OK;
+  return serial_cmd_move_handle_stall(move_result);
 }
 
 int serial_cmd_move_left(int index) {
@@ -138,9 +158,7 @@ int serial_cmd_move_left(int index) {
 
   printf("MOVE_LEFT %d %d\n", mm_to_move, mm_per_sec);
   int move_result = motors_move_mm(true, false, mm_to_move, mm_per_sec);
-  if (move_result) { return ERR_STALL; }
-  
-  return ERR_OK;
+  return serial_cmd_move_handle_stall(move_result);
 }
 
 int serial_cmd_move_right(int index) {
@@ -157,9 +175,7 @@ int serial_cmd_move_right(int index) {
 
   printf("MOVE_RIGHT %d %d\n", mm_to_move, mm_per_sec);
   int move_result = motors_move_mm(false, true, mm_to_move, mm_per_sec);
-  if (move_result) { return ERR_STALL; }
-  
-  return ERR_OK;
+  return serial_cmd_move_handle_stall(move_result);
 }
 
 int serial_cmd_wake(int index) {
