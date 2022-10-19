@@ -57,17 +57,6 @@ int serial_extract_next_word(int index) {
   return index;
 }
 
-
-#define ERR_OK 0
-#define ERR_TOO_MANY_ARGS 100
-#define ERR_TOO_FEW_ARGS 101
-#define ERR_UNKNOWN_CMD 102
-#define ERR_EXECUTION_FAILED 103
-#define ERR_OUT_OF_BOUNDS 104
-#define ERR_MOTORS_SLEEPING 105
-#define ERR_NO_12V_POWER 106
-#define ERR_STALL 107
-
 bool serial_is_eol(int index) {
   char delimiter = input_buffer[index];
 
