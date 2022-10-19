@@ -53,4 +53,7 @@ bool motors_is_awake();
 
 double motors_get_position();
 
+void motors_zero_position();
+void motors_invalidate_position();
+
 #endif

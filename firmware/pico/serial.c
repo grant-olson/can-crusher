@@ -219,6 +219,15 @@ int serial_cmd_position(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_zero(int index) {
+  if (serial_is_eol(index)) {
+    motors_zero_position();
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -247,6 +256,8 @@ int serial_dispatch_cmd() {
     return serial_cmd_home(index);
   } else if (!strcmp(word_buffer, "POSITION?")) {
     return serial_cmd_position(index);
+  } else if (!strcmp(word_buffer, "ZERO")) {
+    return serial_cmd_zero(index);
   }
 
   return ERR_UNKNOWN_CMD;

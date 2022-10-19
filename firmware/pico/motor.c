@@ -462,7 +462,7 @@ void motors_home() {
     stall_status = motors_move_mm(true, true, -30, 10);
   }
 
-  motor_position = 0;
+  motors_zero_position();
   
   motors_move_mm(true, true, 100, 20);
 
@@ -482,4 +482,12 @@ bool motors_is_awake() {
 
 double motors_get_position() {
   return motor_position;
+}
+
+void motors_zero_position() {
+  motor_position = 0;
+}
+
+void motors_invalidate_position() {
+  motor_position = -1;
 }
