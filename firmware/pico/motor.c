@@ -416,9 +416,14 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
 
   // In case we stalled, only modify position by
   // Actual movement.
+  //
   // But if we haven't homed, keep motor position at -1
   // so we know we're not homed.
-  if(motor_position >= 0) {
+  //
+  // Also assume a left-only or right-only movement
+  // is to level the platform so it shouldn't affect
+  // real position
+  if(left && right && motor_position >= 0) {
     double mm_moved = (double)step / (double)SUBSTEPS_PER_MM;
 
     if (is_dir_down) {
