@@ -292,13 +292,20 @@ void serial_process() {
   while(uart_is_readable(SERIAL_UART_ID)) {
     char x = uart_getc(SERIAL_UART_ID);
 
+    // Skip most non-printable characters.
+    if (x >= 0x0 && x <= 0x1F &&
+	x != '\r' && x != '\n' && x != 0x8)
+      {continue;}
+    
+
+    
     serial_putc(x);
 
     if(x == 0x8) {
-      input_buffer_pos--;
+      if (input_buffer_pos > 0) {input_buffer_pos--;}
       continue;
     }
-    
+
     if(x == '\r') {
       x = '\n'; // So we throw \n in our buffer
       serial_putc(x);
