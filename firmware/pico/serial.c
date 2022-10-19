@@ -66,6 +66,7 @@ int serial_extract_next_word(int index) {
 #define ERR_OUT_OF_BOUNDS 104
 #define ERR_MOTORS_SLEEPING 105
 #define ERR_NO_12V_POWER 106
+#define ERR_STALL 107
 
 bool serial_is_eol(int index) {
   char delimiter = input_buffer[index];
@@ -128,7 +129,8 @@ int serial_cmd_move(int index) {
   if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
   
   printf("MOVE %d %d\n", mm_to_move, mm_per_sec);
-  motors_move_mm(true, true, mm_to_move, mm_per_sec);
+  int move_result = motors_move_mm(true, true, mm_to_move, mm_per_sec);
+  if (move_result) { return ERR_STALL; }
   
   return ERR_OK;
 }
@@ -146,7 +148,8 @@ int serial_cmd_move_left(int index) {
   if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
 
   printf("MOVE_LEFT %d %d\n", mm_to_move, mm_per_sec);
-  motors_move_mm(true, false, mm_to_move, mm_per_sec);
+  int move_result = motors_move_mm(true, false, mm_to_move, mm_per_sec);
+  if (move_result) { return ERR_STALL; }
   
   return ERR_OK;
 }
@@ -164,7 +167,8 @@ int serial_cmd_move_right(int index) {
   if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
 
   printf("MOVE_RIGHT %d %d\n", mm_to_move, mm_per_sec);
-  motors_move_mm(false, true, mm_to_move, mm_per_sec);
+  int move_result = motors_move_mm(false, true, mm_to_move, mm_per_sec);
+  if (move_result) { return ERR_STALL; }
   
   return ERR_OK;
 }
