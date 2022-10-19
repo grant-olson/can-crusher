@@ -66,7 +66,7 @@ bool serial_is_eol(int index) {
 
 int serial_cmd_version(int index) {
   if (serial_is_eol(index)) {
-    serial_printf("VERSION %s\r\n", SERIAL_VERSION);
+    serial_printf("VERSION: %s\r\n", SERIAL_VERSION);
   } else {
     return ERR_TOO_MANY_ARGS;
   }
@@ -224,7 +224,7 @@ int serial_dispatch_cmd() {
 
   index = serial_extract_next_word(index);
   
-  if (!strcmp(word_buffer,"VERSION")) {
+  if (!strcmp(word_buffer,"VERSION?")) {
     return serial_cmd_version(index);
     // return;
   } else if (!strcmp(word_buffer, "ECHO")) {
