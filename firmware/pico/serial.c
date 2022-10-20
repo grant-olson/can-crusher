@@ -7,6 +7,7 @@
 #include "string.h"
 #include "motor.h"
 #include "power.h"
+#include "property.h"
 #include "serial.h"
 
 const int max_buffer_size = 1024;
@@ -241,6 +242,59 @@ int serial_cmd_zero(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_get_prop(int index) {
+  if (serial_is_eol(index)) {
+    return ERR_TOO_FEW_ARGS;
+  }
+
+  index++;
+  index = serial_extract_next_word(index);
+
+  can_prop prop_name = property_get_prop_id(word_buffer);
+
+  if (prop_name == PROP_UNKNOWN) { return ERR_BAD_PROP_NAME;}
+
+  if (!serial_is_eol(index)) {
+    return ERR_TOO_MANY_ARGS;
+  }
+
+  uint32_t value = property_get_prop(prop_name);
+
+  serial_printf("PROP: %d\r\n", value);
+  
+  return ERR_OK;
+}
+
+int serial_cmd_set_prop(int index) {
+  if (serial_is_eol(index)) {
+    return ERR_TOO_FEW_ARGS;
+  }
+
+  index++;
+  index = serial_extract_next_word(index);
+
+  can_prop prop_name = property_get_prop_id(word_buffer);
+
+  if (prop_name == PROP_UNKNOWN) { return ERR_BAD_PROP_NAME;}
+
+  if (serial_is_eol(index)) {
+    return ERR_TOO_FEW_ARGS;
+  }
+
+  index++;
+  index = serial_extract_next_word(index);
+  
+  uint32_t prop_val = atoi(word_buffer);
+
+  if (!serial_is_eol(index)) {
+    return ERR_TOO_MANY_ARGS;
+  }
+
+  property_set_prop(prop_name, prop_val);
+  
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -270,6 +324,10 @@ int serial_dispatch_cmd() {
     return serial_cmd_position(index);
   } else if (!strcmp(word_buffer, "ZERO")) {
     return serial_cmd_zero(index);
+  } else if (!strcmp(word_buffer, "PROP?")) {
+    return serial_cmd_get_prop(index);
+  } else if (!strcmp(word_buffer, "PROP=")) {
+    return serial_cmd_set_prop(index);
   }
 
   return ERR_UNKNOWN_CMD;

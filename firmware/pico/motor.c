@@ -4,6 +4,7 @@
 #include "pico/binary_info.h"
 #include "hardware/uart.h"
 #include "power.h"
+#include "property.h"
 #include "motor.h"
 
 static motor_t left_motor;
@@ -227,8 +228,11 @@ bool motor_control_stallguard(motor_t *motor) {
     return false;
   }
 
-  motor_control_register_write(motor, 0x14, 0xFFFFF);
-  motor_control_register_write(motor, 0x40, 0x60);
+  uint32_t tcoolthrs = property_get_prop(PROP_TCOOLTHRS);
+  uint32_t sgthrs = property_get_prop(PROP_SGTHRS);
+
+  motor_control_register_write(motor, 0x14, tcoolthrs);
+  motor_control_register_write(motor, 0x40, sgthrs);
 
   if (motor_control_register_read(motor, 0x2, &motor_write_counter_finish)) {
     puts("Couldn't read counter FINISH");

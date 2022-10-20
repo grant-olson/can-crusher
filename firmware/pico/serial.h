@@ -19,6 +19,7 @@
 #define ERR_STALL_RIGHT 108
 #define ERR_STALL_BOTH 109
 #define ERR_STALL_UNKNOWN 110
+#define ERR_BAD_PROP_NAME 111
 
 int serial_init();
 void serial_process();

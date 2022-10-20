@@ -36,6 +36,11 @@ int main() {
 
   sleep_ms(500);
   
+  if(property_init()) {
+    puts("property_init() failed! ABORTING!");
+    return -1;
+  }
+
   if(led_init()) {
     puts("led_init() failed! ABORTING!");
     return -1;
