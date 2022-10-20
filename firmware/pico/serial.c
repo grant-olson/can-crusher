@@ -15,10 +15,6 @@ static char output_buffer[1024];
 static int input_buffer_pos = 0;
 static char word_buffer[128];
 
-#define SERIAL_VERSION "1.0"
-#define BUILD_ID __DATE__ " " __TIME__
-
-
 #define serial_putc(x) uart_putc(SERIAL_UART_ID, x);
 #define serial_puts(x) uart_puts(SERIAL_UART_ID, x);
 #define serial_printf(...) {sprintf(output_buffer, __VA_ARGS__ );uart_puts(SERIAL_UART_ID, output_buffer);}

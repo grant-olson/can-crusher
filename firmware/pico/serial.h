@@ -1,6 +1,9 @@
 #ifndef __SERIAL_H__
 #define __SERIAL_H__
 
+#define SERIAL_VERSION "1.0"
+#define BUILD_ID __DATE__ " " __TIME__
+
 #define SERIAL_UART_ID uart0
 #define SERIAL_BAUD_RATE 115200
 
