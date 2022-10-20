@@ -16,6 +16,8 @@ static int input_buffer_pos = 0;
 static char word_buffer[128];
 
 #define SERIAL_VERSION "1.0"
+#define BUILD_ID __DATE__ " " __TIME__
+
 
 #define serial_putc(x) uart_putc(SERIAL_UART_ID, x);
 #define serial_puts(x) uart_puts(SERIAL_UART_ID, x);
@@ -26,9 +28,8 @@ int serial_init() {
   gpio_set_function(0, GPIO_FUNC_UART);
   gpio_set_function(1, GPIO_FUNC_UART);
   
-  char intro_string[] = "CC SERIAL CONSOLE\r\n";
-  uart_write_blocking(SERIAL_UART_ID,  intro_string, strlen(intro_string));
-
+  serial_printf("CC SERIAL_CONSOLE [%s]\r\n", BUILD_ID);
+  
   // Flush garbage
   while(uart_is_readable(SERIAL_UART_ID)) {
     uart_getc(SERIAL_UART_ID);
@@ -251,7 +252,6 @@ int serial_dispatch_cmd() {
   
   if (!strcmp(word_buffer,"VERSION?")) {
     return serial_cmd_version(index);
-    // return;
   } else if (!strcmp(word_buffer, "ECHO")) {
     return serial_cmd_echo(index);
   } else if (!strcmp(word_buffer, "MOVE")) {
