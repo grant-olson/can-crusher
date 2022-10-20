@@ -440,7 +440,7 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   return stall_result;
 }
 
-void motors_home() {
+int motors_home() {
   
   uint stall_status = motors_move_mm(true, true, -400, 10);
 
@@ -461,8 +461,11 @@ void motors_home() {
   }
 
   motors_zero_position();
-  
-  motors_move_mm(true, true, 100, 20);
+
+  // Start slow so we don't get a false stall result
+  motors_move_mm(true, true, 3, 10);
+  motors_move_mm(true, true, 3, 15);
+  return motors_move_mm(true, true, 144, 20);
 
 }
 

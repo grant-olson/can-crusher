@@ -213,15 +213,15 @@ int serial_cmd_power_disable(int index) {
 }
 
 int serial_cmd_home(int index) {
-  if (serial_is_eol(index)) {
-    if (!motors_is_awake()) {return ERR_MOTORS_SLEEPING;}
-    if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
-
-    motors_home();
-  } else {
+  if (!serial_is_eol(index)) {
     return ERR_TOO_MANY_ARGS;
   }
-  return ERR_OK;
+
+  if (!motors_is_awake()) {return ERR_MOTORS_SLEEPING;}
+  if (!power_is_enabled()) {return ERR_NO_12V_POWER;}
+
+  int home_result = motors_home();
+  return serial_cmd_move_handle_stall(home_result);
 }
 
 int serial_cmd_position(int index) {

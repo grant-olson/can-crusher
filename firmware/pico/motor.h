@@ -41,7 +41,7 @@ typedef struct {
 
 int motors_move_mm(bool left, bool right, int mm, int mm_per_second);
 int motors_init();
-void motors_home();
+int motors_home();
 
 void motors_stallguard_enable();
 void motors_stallguard_disable();
