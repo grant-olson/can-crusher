@@ -66,7 +66,6 @@ int main() {
   
   // Boot sequence
   printf("Initialization complete. [BUILD: %s]\n", BUILD_ID);
-  led_display(LED_GREEN_MASK);
   motors_wake();
 
   motors_move_mm(true, true, 5, 10);
