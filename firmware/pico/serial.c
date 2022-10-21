@@ -350,6 +350,9 @@ void serial_process() {
     if (x >= 0x0 && x <= 0x1F &&
 	x != '\r' && x != '\n' && x != 0x8)
       {continue;}
+
+    // Make everything CAPS to simplify parsing
+    if (x >= 'a' && x <= 'z') {x -= 0x20;}
     
     serial_putc(x);
 
