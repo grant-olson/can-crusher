@@ -226,8 +226,8 @@ bool motor_control_stallguard(motor_t *motor) {
     return false;
   }
 
-  uint32_t tcoolthrs = property_get_prop(PROP_TCOOLTHRS);
-  uint32_t sgthrs = property_get_prop(PROP_SGTHRS);
+  uint32_t tcoolthrs = property_get_prop(PROP_TCOOL_THRESHOLD);
+  uint32_t sgthrs = property_get_prop(PROP_STALLGUARD_THRESHOLD);
 
   motor_control_register_write(motor, 0x14, tcoolthrs);
   motor_control_register_write(motor, 0x40, sgthrs);

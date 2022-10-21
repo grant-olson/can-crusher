@@ -8,8 +8,8 @@
 static uint32_t property_values[PROP_LEN];
 
 void property_set_defaults() {
-  property_values[PROP_TCOOLTHRS] = 0xFFFFF;
-  property_values[PROP_SGTHRS] = 0x60;
+  property_values[PROP_TCOOL_THRESHOLD] = 0xFFFFF;
+  property_values[PROP_STALLGUARD_THRESHOLD] = 0x60;
   property_values[PROP_STALLGUARD_ENABLED] = 0xFFFFFFFF;
   property_values[PROP_STEPS_PER_MM] = 25;
   property_values[PROP_SUBSTEPS_PER_STEP] = 8;
@@ -40,10 +40,10 @@ int property_set_prop(can_prop prop, uint32_t value) {
 can_prop property_get_prop_id(const char* prop_name) {
   can_prop ret = PROP_UNKNOWN;
   
-  if (!strcmp(prop_name, "TCOOLTHRS")) {
-    ret = PROP_TCOOLTHRS;
-  } else if (!strcmp(prop_name, "SGTHRS")) {
-    ret = PROP_SGTHRS;
+  if (!strcmp(prop_name, "TCOOL_THRESHOLD")) {
+    ret = PROP_TCOOL_THRESHOLD;
+  } else if (!strcmp(prop_name, "STALLGUARD_THRESHOLD")) {
+    ret = PROP_STALLGUARD_THRESHOLD;
   } else if (!strcmp(prop_name, "STALLGUARD_ENABLED")) {
     ret = PROP_STALLGUARD_ENABLED;
   } else if (!strcmp(prop_name, "STEPS_PER_MM")) {
