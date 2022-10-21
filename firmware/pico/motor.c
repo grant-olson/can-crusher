@@ -10,8 +10,6 @@
 static motor_t left_motor;
 static motor_t right_motor;
 
-static bool motor_stallguard_enabled = true;
-
 static bool motor_awake = false;
 
 static double motor_position = -1;
@@ -379,11 +377,15 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   } else {
     motors_set_dir(0);
   }
-  
-  int total_steps = SUBSTEPS_PER_MM * mm;
-  int step_duration_us = (1000000 / mm_per_second ) / (SUBSTEPS_PER_MM);
-  int stall_result = 0;
 
+  int substeps_per_mm = property_get_prop(PROP_STEPS_PER_MM) *
+    property_get_prop(PROP_SUBSTEPS_PER_STEP);
+  int total_steps =  substeps_per_mm * mm;
+  int step_duration_us = (1000000 / mm_per_second ) / substeps_per_mm;
+  
+  int stall_result = 0;
+  bool stallguard_enabled = property_get_prop(PROP_STALLGUARD_ENABLED);
+  
   if (left && right) {step_duration_us = step_duration_us / 2;};
 
   int step; // Capture index for later use
@@ -397,7 +399,10 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
     //
     // Review datasheet later to see if we can figure out a more
     // correct way.
-    if (motor_stallguard_enabled) {
+    //
+    // More notes: it seems this gets reset every full step,
+    // so a miniumum of 8 substeps in this configuration.
+    if (stallguard_enabled) {
       if (left && motor_is_stalled(&left_motor)) {
         if (step > 16) {
           stall_result += left_motor.device_id;
@@ -428,7 +433,7 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   // is to level the platform so it shouldn't affect
   // real position
   if(left && right && motor_position >= 0) {
-    double mm_moved = (double)step / (double)SUBSTEPS_PER_MM;
+    double mm_moved = (double)step / (double)substeps_per_mm;
 
     if (is_dir_down) {
       motor_position -= mm_moved;
@@ -467,14 +472,6 @@ int motors_home() {
   motors_move_mm(true, true, 3, 15);
   return motors_move_mm(true, true, 144, 20);
 
-}
-
-void motors_stallguard_disable() {
-  motor_stallguard_enabled = false;
-}
-
-void motors_stallguard_enable() {
-  motor_stallguard_enabled = true;
 }
 
 bool motors_is_awake() {

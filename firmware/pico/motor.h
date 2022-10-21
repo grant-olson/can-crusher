@@ -6,10 +6,6 @@
 #define MC_UART_ID uart1 
 #define MC_BAUD_RATE 115200
 
-#define SUBSTEPS_PER_STEP 8
-#define STEPS_PER_MM 25
-#define SUBSTEPS_PER_MM (SUBSTEPS_PER_STEP * STEPS_PER_MM)
-
 #define LEFT_DIR_PIN 16
 #define LEFT_STEP_PIN 17
 #define LEFT_MS2_AD1_PIN 18
@@ -42,9 +38,6 @@ typedef struct {
 int motors_move_mm(bool left, bool right, int mm, int mm_per_second);
 int motors_init();
 int motors_home();
-
-void motors_stallguard_enable();
-void motors_stallguard_disable();
 
 int motors_wake();
 int motors_sleep();
