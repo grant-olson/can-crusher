@@ -9,10 +9,12 @@ static uint32_t property_values[PROP_LEN];
 
 void property_set_defaults() {
   property_values[PROP_TCOOL_THRESHOLD] = 0xFFFFF;
-  property_values[PROP_STALLGUARD_THRESHOLD] = 0x60;
+  property_values[PROP_STALLGUARD_THRESHOLD] = 0x83;
   property_values[PROP_STALLGUARD_ENABLED] = 0xFFFFFFFF;
   property_values[PROP_STEPS_PER_MM] = 25;
   property_values[PROP_SUBSTEPS_PER_STEP] = 8;
+  property_values[PROP_HOME_SPEED] = 10;
+  property_values[PROP_HOME_RETRACT_MM] = 200;
 }
 
 int property_init() {
@@ -50,6 +52,10 @@ can_prop property_get_prop_id(const char* prop_name) {
     ret = PROP_STEPS_PER_MM;
   } else if (!strcmp(prop_name, "SUBSTEPS_PER_STEP")) {
     ret = PROP_SUBSTEPS_PER_STEP;
+  } else if (!strcmp(prop_name, "HOME_SPEED")) {
+    ret = PROP_HOME_SPEED;
+  } else if (!strcmp(prop_name, "HOME_RETRACT_MM")) {
+    ret = PROP_HOME_RETRACT_MM;
   }
 
   return ret;

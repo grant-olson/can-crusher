@@ -446,8 +446,9 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
 }
 
 int motors_home() {
+  int home_speed = property_get_prop(PROP_HOME_SPEED);
   
-  uint stall_status = motors_move_mm(true, true, -400, 10);
+  uint stall_status = motors_move_mm(true, true, -400, home_speed);
 
   while (stall_status != 3) {
     if (stall_status == 1) {
@@ -467,10 +468,12 @@ int motors_home() {
 
   motors_zero_position();
 
+  int retract_mm = property_get_prop(PROP_HOME_RETRACT_MM);
+  
   // Start slow so we don't get a false stall result
   motors_move_mm(true, true, 3, 10);
   motors_move_mm(true, true, 3, 15);
-  return motors_move_mm(true, true, 144, 20);
+  return motors_move_mm(true, true, retract_mm-6, home_speed);
 
 }
 

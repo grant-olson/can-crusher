@@ -295,6 +295,16 @@ int serial_cmd_set_prop(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_reset_props(int index) {
+  if (!serial_is_eol(index)) {
+    return ERR_TOO_MANY_ARGS;
+  }
+
+  property_init();
+
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -328,6 +338,8 @@ int serial_dispatch_cmd() {
     return serial_cmd_get_prop(index);
   } else if (!strcmp(word_buffer, "PROP=")) {
     return serial_cmd_set_prop(index);
+  } else if (!strcmp(word_buffer, "RESET_PROPS")) {
+    return serial_cmd_reset_props(index);
   }
 
   return ERR_UNKNOWN_CMD;
