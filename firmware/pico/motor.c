@@ -12,7 +12,7 @@ static motor_t right_motor;
 
 static bool motor_awake = false;
 
-static double motor_position = -1;
+static double motor_position = MOTOR_NOT_HOMED;
 
 motor_t motor_init(motor_t *motor, 
                    uint enable, uint step, uint dir,
@@ -426,13 +426,13 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   // In case we stalled, only modify position by
   // Actual movement.
   //
-  // But if we haven't homed, keep motor position at -1
-  // so we know we're not homed.
+  // But if we haven't homed, keep motor position at
+  // MOTOR_NOT_HOMED so we know we're not homed.
   //
   // Also assume a left-only or right-only movement
   // is to level the platform so it shouldn't affect
   // real position
-  if(left && right && motor_position >= 0) {
+  if(left && right && motor_position > MOTOR_NOT_HOMED) {
     double mm_moved = (double)step / (double)substeps_per_mm;
 
     if (is_dir_down) {
@@ -490,5 +490,5 @@ void motors_zero_position() {
 }
 
 void motors_invalidate_position() {
-  motor_position = -1;
+  motor_position = MOTOR_NOT_HOMED;
 }

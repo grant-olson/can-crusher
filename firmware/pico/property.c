@@ -15,6 +15,7 @@ void property_set_defaults() {
   property_values[PROP_SUBSTEPS_PER_STEP] = 8;
   property_values[PROP_HOME_SPEED] = 10;
   property_values[PROP_HOME_RETRACT_MM] = 200;
+  property_values[PROP_MOTOR_NOT_HOMED] = (uint32_t)MOTOR_NOT_HOMED;
 }
 
 int property_init() {
@@ -26,7 +27,7 @@ int property_init() {
 uint32_t property_get_prop(can_prop prop) {
   // Make sure we have something in valid array bounds
   if (prop == PROP_UNKNOWN || prop >= PROP_LEN) { return -1;}
-  
+
   return property_values[prop];
 }
 
@@ -34,6 +35,9 @@ int property_set_prop(can_prop prop, uint32_t value) {
   // Make sure we have something in valid array bounds
   if (prop == PROP_UNKNOWN || prop >= PROP_LEN) { return -1;}
 
+  // read only
+  if (prop == PROP_MOTOR_NOT_HOMED) { return -1; }
+  
   property_values[prop] = value;
 
   return 0;
@@ -56,6 +60,8 @@ can_prop property_get_prop_id(const char* prop_name) {
     ret = PROP_HOME_SPEED;
   } else if (!strcmp(prop_name, "HOME_RETRACT_MM")) {
     ret = PROP_HOME_RETRACT_MM;
+  } else if (!strcmp(prop_name, "MOTOR_NOT_HOMED")) {
+    ret = PROP_MOTOR_NOT_HOMED;
   }
 
   return ret;

@@ -9,6 +9,7 @@ typedef enum can_prop {
   PROP_SUBSTEPS_PER_STEP,
   PROP_HOME_SPEED,
   PROP_HOME_RETRACT_MM,
+  PROP_MOTOR_NOT_HOMED,
   PROP_LEN,
   PROP_UNKNOWN=-1
 } can_prop;

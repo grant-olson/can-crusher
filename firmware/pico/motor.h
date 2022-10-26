@@ -24,6 +24,10 @@
 
 #define RIGHT_DEVICE_ID 2
 
+// Use an excessively large negative number here.
+// We might have some drift on undetected stalls,
+// but not 1000 times the height of the whole device
+#define MOTOR_NOT_HOMED -400000
 
 typedef struct {
   uint enable_pin;

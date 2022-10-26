@@ -260,7 +260,12 @@ int serial_cmd_get_prop(int index) {
 
   uint32_t value = property_get_prop(prop_name);
 
-  serial_printf("PROP: %d\r\n", value);
+  if (prop_name == PROP_MOTOR_NOT_HOMED) {
+    // Hack for signed int. Do better if we get more.
+    serial_printf("PROP: %d\r\n", (int32_t)value);
+  } else {
+    serial_printf("PROP: %d\r\n", value);
+  }
   
   return ERR_OK;
 }
