@@ -7,6 +7,7 @@
 #include "power.h"
 #include "motor.h"
 #include "serial.h"
+#include "property.h"
 
 int main() {
   bi_decl(bi_program_description("Firmware for can crusher."));
