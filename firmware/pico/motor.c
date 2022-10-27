@@ -397,11 +397,31 @@ int motors_move_mm_pio(bool left, bool right, int mm, int mm_per_second) {
   step_both_x_times(pio, 0, total_steps, steps_per_second);
   printf("CHECKING FOR ANSWER\n");
   
-  // For now, just wait until we're done.
+  // For now, just block and wait until we're done,
+  // even though we can do work in the background now.
   int32_t remaining_ticks = pio_sm_get_blocking(pio, 0);
   printf("Stepped with answer %d\n", remaining_ticks);
+  
   if(remaining_ticks >= 0) { // We aborted
-    return 3;
+    if (left && motor_is_stalled(&left_motor)) {
+      res += left_motor.device_id;
+    }
+    
+    if (right && motor_is_stalled(&right_motor)) {
+      res += right_motor.device_id;
+    }
+  }
+  
+  if(left && right && motor_position > MOTOR_NOT_HOMED) {
+    // remaining_ticks + 1 because pio pre-decrements results.
+    remaining_ticks += 1;
+    double mm_moved = (double)(total_steps - remaining_ticks + 1) / (double)substeps_per_mm;
+
+    if (is_dir_down) {
+      motor_position -= mm_moved;
+    } else {
+      motor_position += mm_moved;
+    }
   }
   
   return res;
