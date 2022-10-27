@@ -434,26 +434,13 @@ int motors_move_mm_naive(bool left, bool right, int mm, int mm_per_second) {
     if (left) {motor_step(&left_motor, step_duration_us);}
     if (right) {motor_step(&right_motor, step_duration_us);}
 
-    // This seems fishy, but we need it or we'll always seem
-    // to be stalled after a pause in movement. Wait two full
-    // steps before enforcing stallguard.
-    //
-    // Review datasheet later to see if we can figure out a more
-    // correct way.
-    //
-    // More notes: it seems this gets reset every full step,
-    // so a miniumum of 8 substeps in this configuration.
     if (stallguard_enabled) {
       if (left && motor_is_stalled(&left_motor)) {
-        if (step > 16) {
-          stall_result += left_motor.device_id;
-        }
+        stall_result += left_motor.device_id;
       }
     
       if (right && motor_is_stalled(&right_motor)) {
-        if (step > 16) {
-          stall_result += right_motor.device_id;
-        }
+        stall_result += right_motor.device_id;
       }
     }
     

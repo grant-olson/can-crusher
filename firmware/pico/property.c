@@ -8,7 +8,7 @@
 static uint32_t property_values[PROP_LEN];
 
 void property_set_defaults() {
-  property_values[PROP_TCOOL_THRESHOLD] = 0xFFFFF;
+  property_values[PROP_TCOOL_THRESHOLD] = 0x100;
   property_values[PROP_STALLGUARD_THRESHOLD] = 0x83;
   property_values[PROP_STALLGUARD_ENABLED] = 0xFFFFFFFF;
   property_values[PROP_STEPS_PER_MM] = 25;
