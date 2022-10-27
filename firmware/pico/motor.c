@@ -532,6 +532,8 @@ int motors_home() {
   uint stall_status = motors_move_mm(true, true, -400, home_speed);
 
   while (stall_status != 3) {
+    motors_sleep(); motors_wake(); // clear stallguard bit
+
     if (stall_status == 1) {
       motors_move_mm(false, true, -10, 10);
     }
@@ -547,14 +549,14 @@ int motors_home() {
     stall_status = motors_move_mm(true, true, -30, 10);
   }
 
+  puts("HOMED");
   motors_zero_position();
 
   int retract_mm = property_get_prop(PROP_HOME_RETRACT_MM);
-  
-  // Start slow so we don't get a false stall result
-  motors_move_mm(true, true, 3, 10);
-  motors_move_mm(true, true, 3, 15);
-  return motors_move_mm(true, true, retract_mm-6, home_speed);
+
+  motors_sleep(); motors_wake();
+
+  return motors_move_mm(true, true, retract_mm, home_speed);
 
 }
 
