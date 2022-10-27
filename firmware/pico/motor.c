@@ -393,14 +393,11 @@ int motors_move_mm_pio(bool left, bool right, int mm, int mm_per_second) {
 
   int steps_per_second = substeps_per_mm * mm_per_second;
 
-  printf("Gonna step %d times at %d steps per second\n", total_steps, steps_per_second);
   step_both_x_times(pio, 0, total_steps, steps_per_second);
-  printf("CHECKING FOR ANSWER\n");
   
   // For now, just block and wait until we're done,
   // even though we can do work in the background now.
   int32_t remaining_ticks = pio_sm_get_blocking(pio, 0);
-  printf("Stepped with answer %d\n", remaining_ticks);
   
   if(remaining_ticks >= 0) { // We aborted
     if (left && motor_is_stalled(&left_motor)) {

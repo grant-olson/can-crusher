@@ -52,7 +52,6 @@ void step_both_program_init(PIO pio, uint sm, uint offset, uint pin, uint ss_pin
 
 uint32_t step_clocks_for_frequency(uint frequency) {
   uint32_t clocks = (clock_get_hz(clk_sys) / (2 * frequency)) - 11; // 11 to account for control clock cycles
-  printf("CLOCKS %d\n", clocks);
   return clocks;
 }
 
