@@ -1,0 +1,64 @@
+;
+; Drive stepper motors with PIO so the clocks are consistent and on time.
+;
+; Push in a number or steps to take, and the number of cycles to burn
+; to get the correct frequency, then pull out the number of remaining steps
+; so we can see if we stalled.
+
+.program step_both
+.side_set 1 opt
+
+.wrap_target
+    pull block             ; Get number of steps
+    out y, 32
+    pull block             ; Get clock cycles to burn to obtain correct frequency
+
+lp0:
+    out x, 32              ; save to x
+    pull noblock           ; copy x back in to OSR to use each loop
+    set pins, 1 side 0x1   ; Clock ON
+lp1:
+    jmp x-- lp1            ; Delay for (x + 1) cycles, x is a 32 bit number
+    out x, 32              ; grab saved copy of burns
+    pull noblock           ; copy x back to osr
+    set pins, 0 side 0x0   ; Clock OFF
+lp2:
+    jmp x-- lp2            ; Delay for the same number of cycles again
+    jmp pin lp3		   ; Abort if we report stall
+    jmp y-- lp0            ; count as one full cycle
+lp3:
+
+    mov isr, y             ; Move remaining cycles in to isr
+    push block		   ; Send off to main program
+.wrap                      ; Wait for next set of instructions
+
+
+% c-sdk {
+// Initial Setup
+#include "hardware/clocks.h"
+
+void step_both_program_init(PIO pio, uint sm, uint offset, uint pin, uint ss_pin, uint jmp_pin) {
+  pio_gpio_init(pio, pin);
+  pio_gpio_init(pio, ss_pin);
+  pio_gpio_init(pio, jmp_pin);
+  pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+  pio_sm_set_consecutive_pindirs(pio, sm, ss_pin, 1, true);
+  pio_sm_config c = step_both_program_get_default_config(offset);
+  sm_config_set_set_pins(&c, pin, 1);
+  sm_config_set_sideset_pins(&c, ss_pin);
+  sm_config_set_jmp_pin(&c, jmp_pin);
+  pio_sm_init(pio, sm, offset, &c);
+}
+
+uint32_t step_clocks_for_frequency(uint frequency) {
+  uint32_t clocks = (clock_get_hz(clk_sys) / (2 * frequency)) - 11; // 11 to account for control clock cycles
+  printf("CLOCKS %d\n", clocks);
+  return clocks;
+}
+
+void step_both_x_times(PIO pio, int sm, uint steps, uint frequency) {
+  pio->txf[sm] = steps;
+  pio->txf[sm] = step_clocks_for_frequency(frequency);
+
+}
+%}

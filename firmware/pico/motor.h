@@ -24,6 +24,9 @@
 
 #define RIGHT_DEVICE_ID 2
 
+#define STEP_PIO_STATE_MACHINE 0
+#define STEP_STRATEGY_PIO true // False to use naive strategy which doesn't have precise timing
+
 // Use an excessively large negative number here.
 // We might have some drift on undetected stalls,
 // but not 1000 times the height of the whole device

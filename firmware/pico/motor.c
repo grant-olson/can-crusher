@@ -5,6 +5,7 @@
 #include "hardware/uart.h"
 #include "power.h"
 #include "property.h"
+#include "step.pio.h"
 #include "motor.h"
 
 static motor_t left_motor;
@@ -13,6 +14,8 @@ static motor_t right_motor;
 static bool motor_awake = false;
 
 static double motor_position = MOTOR_NOT_HOMED;
+
+static PIO pio = pio0;
 
 motor_t motor_init(motor_t *motor, 
                    uint enable, uint step, uint dir,
@@ -297,6 +300,11 @@ int motors_init() {
              RIGHT_DIR_PIN, RIGHT_STALL_PIN, RIGHT_DEVICE_ID,
              RIGHT_MS1_AD0_PIN, RIGHT_MS2_AD1_PIN);
 
+  if (STEP_STRATEGY_PIO) {
+    uint offset = pio_add_program(pio, &step_both_program);
+    step_both_program_init(pio, 0, offset, LEFT_STEP_PIN, RIGHT_STEP_PIN, RIGHT_STALL_PIN);
+    pio_sm_set_enabled(pio, 0, true);
+  }
 
   return res;
 }
@@ -367,7 +375,40 @@ int motors_are_stalled() {
   return result;
 }
 
-int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
+// PIO based driver to move motors
+int motors_move_mm_pio(bool left, bool right, int mm, int mm_per_second) {
+  int res = 0;
+  bool is_dir_down = (mm < 0);
+  
+  if (is_dir_down) {
+    mm = 0 - mm;
+    motors_set_dir(1);
+  } else {
+    motors_set_dir(0);
+  }
+
+  int substeps_per_mm = property_get_prop(PROP_STEPS_PER_MM) *
+    property_get_prop(PROP_SUBSTEPS_PER_STEP);
+  int total_steps =  substeps_per_mm * mm;
+
+  int steps_per_second = substeps_per_mm * mm_per_second;
+
+  printf("Gonna step %d times at %d steps per second\n", total_steps, steps_per_second);
+  step_both_x_times(pio, 0, total_steps, steps_per_second);
+  printf("CHECKING FOR ANSWER\n");
+  
+  // For now, just wait until we're done.
+  int32_t remaining_ticks = pio_sm_get_blocking(pio, 0);
+  printf("Stepped with answer %d\n", remaining_ticks);
+  if(remaining_ticks >= 0) { // We aborted
+    return 3;
+  }
+  
+  return res;
+}
+
+// Basic all C implementation. Timing isn't exact
+int motors_move_mm_naive(bool left, bool right, int mm, int mm_per_second) {
   int res = 0;
   bool is_dir_down = (mm < 0);
   
@@ -443,6 +484,15 @@ int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
   }
   
   return stall_result;
+}
+
+
+int motors_move_mm(bool left, bool right, int mm, int mm_per_second) {
+  if (STEP_STRATEGY_PIO) {
+    return motors_move_mm_pio(left, right, mm, mm_per_second);
+  } else {
+    return motors_move_mm_naive(left, right, mm, mm_per_second);
+  }
 }
 
 int motors_home() {

@@ -17,10 +17,13 @@ add_executable(can-crusher
   property.c
 )
 
+pico_generate_pio_header(can-crusher ${CMAKE_CURRENT_LIST_DIR}/step.pio)
+
+
 pico_enable_stdio_usb(can-crusher 1)
 # Must be off or it interferes with talking to TMC2209
 pico_enable_stdio_uart(can-crusher 0)
 
 pico_add_extra_outputs(can-crusher)
 
-target_link_libraries(can-crusher pico_stdlib)
+target_link_libraries(can-crusher pico_stdlib hardware_pio)
