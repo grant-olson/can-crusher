@@ -16,6 +16,7 @@ static bool motor_awake = false;
 static double motor_position = MOTOR_NOT_HOMED;
 
 static PIO pio = pio0;
+static uint offset_both, offset_one;
 
 motor_t motor_init(motor_t *motor, 
                    uint enable, uint step, uint dir,
@@ -301,9 +302,16 @@ int motors_init() {
              RIGHT_MS1_AD0_PIN, RIGHT_MS2_AD1_PIN);
 
   if (STEP_STRATEGY_PIO) {
-    uint offset = pio_add_program(pio, &step_both_program);
-    step_both_program_init(pio, 0, offset, LEFT_STEP_PIN, RIGHT_STEP_PIN, RIGHT_STALL_PIN);
-    pio_sm_set_enabled(pio, 0, true);
+    step_gpio_init(pio, LEFT_STEP_PIN, RIGHT_STEP_PIN, LEFT_STALL_PIN, RIGHT_STALL_PIN);
+    
+    offset_both = pio_add_program(pio, &step_both_program);
+    step_both_program_init(pio, STEP_PIO_SM_BOTH, offset_both, LEFT_STEP_PIN, RIGHT_STEP_PIN, LEFT_STALL_PIN);
+    pio_sm_set_enabled(pio, STEP_PIO_SM_BOTH, true);
+
+    offset_one = pio_add_program(pio, &step_one_program);
+    step_one_program_init(pio, STEP_PIO_SM_ONE, offset_one, LEFT_STEP_PIN, LEFT_STALL_PIN);
+    pio_sm_set_enabled(pio, STEP_PIO_SM_ONE, true);
+
   }
 
   return res;
@@ -393,11 +401,28 @@ int motors_move_mm_pio(bool left, bool right, int mm, int mm_per_second) {
 
   int steps_per_second = substeps_per_mm * mm_per_second;
 
-  step_both_x_times(pio, 0, total_steps, steps_per_second);
+  int sm;
   
+  if (left && right) {
+    step_x_times(pio, STEP_PIO_SM_BOTH, total_steps, steps_per_second);
+    sm = STEP_PIO_SM_BOTH;
+  } else {
+    sm = STEP_PIO_SM_ONE;
+
+    pio_sm_set_enabled(pio, STEP_PIO_SM_ONE, false);
+    if (left) {
+      step_one_set_pins(pio, sm, offset_one, LEFT_STEP_PIN, LEFT_DIR_PIN);
+    } else {
+      step_one_set_pins(pio, sm, offset_one, RIGHT_STEP_PIN, RIGHT_DIR_PIN);
+    }
+    pio_sm_set_enabled(pio, STEP_PIO_SM_ONE, true);
+
+    step_x_times(pio, STEP_PIO_SM_ONE, total_steps, steps_per_second);
+  }
+
   // For now, just block and wait until we're done,
   // even though we can do work in the background now.
-  int32_t remaining_ticks = pio_sm_get_blocking(pio, 0);
+  int32_t remaining_ticks = pio_sm_get_blocking(pio, sm);
   
   if(remaining_ticks >= 0) { // We aborted
     if (left && motor_is_stalled(&left_motor)) {
@@ -408,11 +433,13 @@ int motors_move_mm_pio(bool left, bool right, int mm, int mm_per_second) {
       res += right_motor.device_id;
     }
   }
-  
+
+  // Assume a wiggle on left or right doesn't affect position.
   if(left && right && motor_position > MOTOR_NOT_HOMED) {
     // remaining_ticks + 1 because pio pre-decrements results.
     remaining_ticks += 1;
-    double mm_moved = (double)(total_steps - remaining_ticks + 1) / (double)substeps_per_mm;
+    
+    double mm_moved = (double)(total_steps - remaining_ticks) / (double)substeps_per_mm;
 
     if (is_dir_down) {
       motor_position -= mm_moved;

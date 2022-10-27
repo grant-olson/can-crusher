@@ -24,7 +24,9 @@
 
 #define RIGHT_DEVICE_ID 2
 
-#define STEP_PIO_STATE_MACHINE 0
+#define STEP_PIO_SM_BOTH 0
+#define STEP_PIO_SM_ONE 1
+
 #define STEP_STRATEGY_PIO true // False to use naive strategy which doesn't have precise timing
 
 // Use an excessively large negative number here.
