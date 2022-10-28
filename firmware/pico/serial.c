@@ -305,7 +305,27 @@ int serial_cmd_reset_props(int index) {
     return ERR_TOO_MANY_ARGS;
   }
 
-  property_init();
+  property_set_defaults();
+
+  return ERR_OK;
+}
+
+int serial_cmd_save_props(int index) {
+  if (!serial_is_eol(index)) {
+    return ERR_TOO_MANY_ARGS;
+  }
+
+  property_save();
+
+  return ERR_OK;
+}
+
+int serial_cmd_load_props(int index) {
+  if (!serial_is_eol(index)) {
+    return ERR_TOO_MANY_ARGS;
+  }
+
+  property_load();
 
   return ERR_OK;
 }
@@ -345,6 +365,10 @@ int serial_dispatch_cmd() {
     return serial_cmd_set_prop(index);
   } else if (!strcmp(word_buffer, "RESET_PROPS")) {
     return serial_cmd_reset_props(index);
+  } else if (!strcmp(word_buffer, "LOAD_PROPS")) {
+    return serial_cmd_load_props(index);
+  } else if (!strcmp(word_buffer, "SAVE_PROPS")) {
+    return serial_cmd_save_props(index);
   }
 
   return ERR_UNKNOWN_CMD;

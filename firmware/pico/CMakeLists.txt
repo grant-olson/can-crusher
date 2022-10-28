@@ -26,4 +26,4 @@ pico_enable_stdio_uart(can-crusher 0)
 
 pico_add_extra_outputs(can-crusher)
 
-target_link_libraries(can-crusher pico_stdlib hardware_pio)
+target_link_libraries(can-crusher pico_stdlib hardware_pio hardware_flash hardware_sync)
