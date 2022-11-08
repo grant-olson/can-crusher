@@ -116,6 +116,8 @@ int serial_extract_move_params(int index, int* mm_to_move, int* mm_per_sec) {
     return ERR_TOO_MANY_ARGS;
   }
 
+  if (*mm_per_sec == 0) { return ERR_BAD_VALUE; }
+  
   return ERR_OK;
 }
 
