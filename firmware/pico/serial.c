@@ -61,6 +61,15 @@ bool serial_is_eol(int index) {
   return (delimiter == '\n') || (delimiter == 0x0) || (delimiter == '\r');
 }
 
+bool serial_is_valid_int(int number) {
+  if (number != 0) return true;
+
+  if (strlen(word_buffer) == 1 && word_buffer[0] == '0') return true;
+
+  return false;
+}
+
+
 
 int serial_cmd_version(int index) {
   if (serial_is_eol(index)) {
@@ -91,6 +100,8 @@ int serial_extract_move_params(int index, int* mm_to_move, int* mm_per_sec) {
   index = serial_extract_next_word(index);
   *mm_to_move = atoi(word_buffer);
 
+  if (!serial_is_valid_int(*mm_to_move)) return ERR_BAD_INT;
+  
   if (serial_is_eol(index)) {
     return ERR_TOO_FEW_ARGS;
   }
@@ -99,6 +110,8 @@ int serial_extract_move_params(int index, int* mm_to_move, int* mm_per_sec) {
   index = serial_extract_next_word(index);
   *mm_per_sec = atoi(word_buffer);
 
+  if (!serial_is_valid_int(*mm_per_sec)) return ERR_BAD_INT;
+  
   if (!serial_is_eol(index)) {
     return ERR_TOO_MANY_ARGS;
   }
@@ -291,6 +304,8 @@ int serial_cmd_set_prop(int index) {
   
   uint32_t prop_val = atoi(word_buffer);
 
+  if (!serial_is_valid_int(prop_val)) return ERR_BAD_INT;
+  
   if (!serial_is_eol(index)) {
     return ERR_TOO_MANY_ARGS;
   }
