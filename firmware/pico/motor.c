@@ -535,12 +535,12 @@ int motors_home() {
     motors_sleep(); motors_wake(); // clear stallguard bit
 
     if (stall_status == 1) {
-      motors_move_mm(false, true, -4, home_speed);
+      motors_move_mm(false, true, -1, home_speed);
     }
     
 
     if (stall_status == 2) {
-      motors_move_mm(true, false, -4, home_speed);
+      motors_move_mm(true, false, -1, home_speed);
     }
 
     puts("Backing up...");

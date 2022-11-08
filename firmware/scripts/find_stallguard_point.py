@@ -38,6 +38,7 @@ def find_range_once(speed):
   bad, good = 255 , 0
   bad, good = narrow_sg_range(bad, good, -64, speed)
   if bad == 0: return 0
+  if good == 255: return 255 
   bad, good = narrow_sg_range(bad, good, -16, speed)
   if bad == 0: return 0
 #  bad, good = narrow_sg_range(bad, good,-8, speed)
@@ -50,7 +51,7 @@ def find_range_once(speed):
   
   if bad == 0:
     bad, good = narrow_sg_range(last_good+3, last_good-3, -1, speed)
-  print("SPEED: %d BAD %d, GOOD %d" % (speed, bad, good))
+  #print("SPEED: %d BAD %d, GOOD %d" % (speed, bad, good))
   return good
   
 
@@ -62,9 +63,11 @@ def find_range(speed):
     raise RuntimeError("BAD DATA POINTS!")
   average = statistics.mean(results)
   print("AVERAGE: %f" % average)
-  safe_average = average * 0.95 # give an extra 5%
+  safe_average = average * 0.975 # give an extra 2.5%
   safe_average = int(safe_average)
   print("FINAL: %d" % safe_average)
+
+  return safe_average
 
 values = []
 
@@ -79,8 +82,15 @@ values = []
 # 25 - 135 ?
 # 30 - ???
 
-for i in range(28,36,5):
+# After Rods
+
+# 10 - 142
+
+# Prototype 1 results: [(10, 136), (15, 163), (20, 178), (25, 183), (30, 181)]
+
+for i in range(10,31,5):
   cli.set_prop("STALLGUARD_THRESHOLD", 171)
+  cli.set_prop("HOME_RETRACT_MM", 230)
   cli.sleep()
   cli.wake()
   cli.move(10,20)
@@ -89,12 +99,12 @@ for i in range(28,36,5):
   res = find_range(i)
   values.append( (i,res) )
 
-  ten_speed = 131 #values[0][1]
-  cli.set_prop("STALLGUARD_THRESHOLD", ten_speed)
+  cli.set_prop("STALLGUARD_THRESHOLD", res)
+  cli.set_prop("HOME_SPEED", i)
   cli.sleep()
   cli.wake()
   cli.home()
   sleep(1.0)
-  cli.move(50, 10)
+
   
 print(repr(values))
