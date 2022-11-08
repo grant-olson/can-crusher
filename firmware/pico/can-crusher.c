@@ -69,11 +69,13 @@ int main() {
   printf("Initialization complete. [BUILD: %s]\n", BUILD_ID);
   motors_wake();
 
-  motors_move_mm(true, true, 5, 10);
+  int home_speed = property_get_prop(PROP_HOME_SPEED);
+
+  motors_move_mm(true, true, 5, home_speed);
   motors_sleep();
   sleep_ms(250);
   motors_wake();
-  motors_move_mm(true, true, -5, 10);
+  motors_move_mm(true, true, -5, home_speed);
   
   motors_sleep();
   
