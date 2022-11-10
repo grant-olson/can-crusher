@@ -1,10 +1,45 @@
 #!/usr/bin/env python
 
+desc = """
+This program tries to find the ideal stallguard values for a range of motion.
+These values are needed so we can detect when we hit the limits of range of
+motion or encouner an obsruction such as a can.
+
+It will:
+
+* Run 5 tests at a given mm/sec finding where we can first move freely
+    without getting a false positive stall.
+
+* Average the result.
+
+* Add in a margin of error to avoid false positives later.
+
+* Home the device with the new settings to see if it works.
+
+To use the crusher element should be 15-20 mm from the top of range of
+movement.
+
+Then you should provide start, end, and step ranges:
+
+./find_stallguard_point 5 35 5
+./find_stallguard_point 2 8 1
+
+At the end you'll get a report of speeds and values.
+"""
+
 from serial_cli import *
 import statistics
 from time import sleep
 import sys
 
+if len(sys.argv) != 4:
+  print(desc)
+  exit(-1)
+
+range_start = int(sys.argv[1])
+range_end = int(sys.argv[2])
+range_step = int(sys.argv[3])
+  
 cli = SerialCLI("/dev/ttyUSB0")
 
 def retry_wake():
@@ -14,18 +49,18 @@ def retry_wake():
     cli.wake()
 
 def narrow_sg_range(bad, good, step, speed):
-  sys.stdout.write("Trying ")
   for i in range(bad, good-1, step):
+    if i < 1:
+      i = 0
     cli.set_prop("STALLGUARD_THRESHOLD", i)
     cli.sleep()
     sleep(1)
-    sys.stdout.write("%i. " % i)
+    sys.stdout.write(".")
     sys.stdout.flush()
     retry_wake()
     try:
       cli.move(-10, speed)
       cli.move(10, speed)
-      print()
       return (i - step, i)
     except SerialException as ex:
       pass # Later check for stall
@@ -35,7 +70,7 @@ def narrow_sg_range(bad, good, step, speed):
 
 
 def find_range_once(speed):
-  bad, good = 255 , 0
+  bad, good = 255 , -1
   bad, good = narrow_sg_range(bad, good, -64, speed)
   if bad == 0: return 0
   if good == 255: return 255 
@@ -56,16 +91,22 @@ def find_range_once(speed):
   
 
 def find_range(speed):
-  results = [find_range_once(speed) for x in range(0,5)]
+  results = []
+  for x in range(0,5):
+    sys.stdout.write("Sample %i" % x)
+    result = find_range_once(speed)
+    print("\nTHRESHOLD: %d" % result)
+    results.append(result)
   print("RAW RESULTS: %s" % repr(results))
   results = [x for x in results if x != 0]
   if len(results) < 3:
     raise RuntimeError("BAD DATA POINTS!")
   average = statistics.mean(results)
   print("AVERAGE: %f" % average)
-  safe_average = average * 0.975 # give an extra 2.5%
+  margin_of_error = 0.025 # give an extra 2.5%
+  safe_average = average * (1-margin_of_error) 
   safe_average = int(safe_average)
-  print("FINAL: %d" % safe_average)
+  print("WITH %0.2f MARGIN: %d" % (margin_of_error, safe_average))
 
   return safe_average
 
@@ -88,13 +129,16 @@ values = []
 
 # Prototype 1 results: [(10, 136), (15, 163), (20, 178), (25, 183), (30, 181)]
 
-for i in range(10,31,5):
-  cli.set_prop("STALLGUARD_THRESHOLD", 171)
-  cli.set_prop("HOME_RETRACT_MM", 230)
+cli.set_prop("STALLGUARD_THRESHOLD", 100)
+cli.set_prop("HOME_RETRACT_MM", 210)
+
+default_speed = int(cli.get_prop("HOME_SPEED"))
+
+for i in range(range_start,range_end,range_step):
   cli.sleep()
   cli.wake()
-  cli.move(10,20)
-  cli.move(-10,20)
+  cli.move(10,default_speed)
+  cli.move(-10,default_speed)
 
   res = find_range(i)
   values.append( (i,res) )
