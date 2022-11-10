@@ -74,7 +74,7 @@ class SerialCLI:
     if error_code:
       raise SerialException(SerialCLI.ERRORS[error_code])
       
-    return (error_code, answer)
+    return answer
 
   def version(self):
     return self.cmd("VERSION?")
@@ -88,7 +88,7 @@ class SerialCLI:
     attr_name = attr_name.upper()
     if attr_name in SerialCLI.COMMANDS:
       def wrapped_method(*args):
-        self.cmd(attr_name, *args)
+        return self.cmd(attr_name, *args)
       return wrapped_method
     else:
       raise AttributeError()

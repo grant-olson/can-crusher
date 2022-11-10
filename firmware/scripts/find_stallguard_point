@@ -97,6 +97,7 @@ def find_range(speed):
     result = find_range_once(speed)
     print("\nTHRESHOLD: %d" % result)
     results.append(result)
+  print("REPORT @ %d mm/sec" % speed)
   print("RAW RESULTS: %s" % repr(results))
   results = [x for x in results if x != 0]
   if len(results) < 3:
@@ -128,6 +129,20 @@ values = []
 # 10 - 142
 
 # Prototype 1 results: [(10, 136), (15, 163), (20, 178), (25, 183), (30, 181)]
+
+# Two
+#RAW RESULTS: [123, 123, 123, 123, 123]
+#AVERAGE: 123.000000
+#WITH 0.03 MARGIN: 119
+#REPORT @ 3 mm/sec
+#RAW RESULTS: [158, 159, 159, 160, 159]
+#AVERAGE: 159.000000
+#WITH 0.03 MARGIN: 155
+#REPORT @ 4 mm/sec
+#RAW RESULTS: [191, 191, 191, 191, 191]
+#AVERAGE: 191.000000
+#WITH 0.03 MARGIN: 186
+
 
 cli.set_prop("STALLGUARD_THRESHOLD", 100)
 cli.set_prop("HOME_RETRACT_MM", 210)
