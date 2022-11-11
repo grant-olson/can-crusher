@@ -8,6 +8,7 @@
 #include "motor.h"
 #include "serial.h"
 #include "property.h"
+#include "power_management.h"
 
 int main() {
   bi_decl(bi_program_description("Firmware for can crusher."));
@@ -65,6 +66,11 @@ int main() {
     return -1;
   }
   
+  if(power_management_init()) {
+    puts("power_management_init() failed! ABORTING!");
+    return -1;
+  }
+  
   // Boot sequence
   printf("Initialization complete. [BUILD: %s]\n", BUILD_ID);
   motors_wake();
@@ -82,6 +88,7 @@ int main() {
   serial_flush();
   while(1) {
     serial_process();
+    power_management_tick();
     sleep_ms(100);
   };
 

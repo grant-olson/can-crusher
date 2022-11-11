@@ -15,6 +15,7 @@ add_executable(can-crusher
   power.c
   serial.c
   property.c
+  power_management.c
 )
 
 pico_generate_pio_header(can-crusher ${CMAKE_CURRENT_LIST_DIR}/step.pio)

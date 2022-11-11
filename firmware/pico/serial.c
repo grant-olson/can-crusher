@@ -8,6 +8,7 @@
 #include "motor.h"
 #include "power.h"
 #include "property.h"
+#include "power_management.h"
 #include "serial.h"
 
 const int max_buffer_size = 1024;
@@ -248,6 +249,15 @@ int serial_cmd_position(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_awake(int index) {
+  if (serial_is_eol(index)) {
+    serial_printf("AWAKE: %d\r\n", motors_is_awake());
+  } else {
+    return ERR_TOO_MANY_ARGS;
+  }
+  return ERR_OK;
+}
+
 int serial_cmd_zero(int index) {
   if (serial_is_eol(index)) {
     motors_zero_position();
@@ -347,6 +357,22 @@ int serial_cmd_load_props(int index) {
   return ERR_OK;
 }
 
+int serial_cmd_kick(int index) {
+  if (!serial_is_eol(index)) {
+    return ERR_TOO_MANY_ARGS;
+  }
+
+  // This is a bit redundant since we kick
+  // power management after any command is received,
+  // but keeping this here in case the logic is modified
+  // in the future.
+  //
+  // A KICK command should always reset the power management.
+  power_management_kick();
+
+  return ERR_OK;
+}
+
 int serial_dispatch_cmd() {
   int index = 0;
 
@@ -374,6 +400,8 @@ int serial_dispatch_cmd() {
     return serial_cmd_home(index);
   } else if (!strcmp(word_buffer, "POSITION?")) {
     return serial_cmd_position(index);
+  } else if (!strcmp(word_buffer, "AWAKE?")) {
+    return serial_cmd_awake(index);
   } else if (!strcmp(word_buffer, "ZERO")) {
     return serial_cmd_zero(index);
   } else if (!strcmp(word_buffer, "PROP?")) {
@@ -386,6 +414,8 @@ int serial_dispatch_cmd() {
     return serial_cmd_load_props(index);
   } else if (!strcmp(word_buffer, "SAVE_PROPS")) {
     return serial_cmd_save_props(index);
+  } else if (!strcmp(word_buffer, "KICK")) {
+    return serial_cmd_kick(index);
   }
 
   return ERR_UNKNOWN_CMD;
@@ -437,6 +467,8 @@ void serial_process() {
       } else {
 	serial_printf("ERR %d\r\n", result);
       }
+
+      power_management_kick(); // reset power down timers
       
       input_buffer_pos = 0;
     } else if(input_buffer_pos > (max_buffer_size - 1)) {
