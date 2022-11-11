@@ -25,6 +25,7 @@ class SerialCLI:
     
     "ECHO",
     "HOME",
+    "LOAD_PROPS",
     "MOVE",
     "MOVE_LEFT",
     "MOVE_RIGHT",
@@ -33,10 +34,14 @@ class SerialCLI:
     "POWER_ON",
     "PROP=",
     "PROP?",
+    "RESET_PROPS",
+    "SAVE_PROPS",
     "SLEEP",
     "VERSION?",
     "WAKE",
     "ZERO",
+    "AWAKE?",
+    "KICK"
     ]
   
   def __init__(self, device):
@@ -84,6 +89,8 @@ class SerialCLI:
       attr_name = "PROP="
     elif attr_name == "get_prop":
       attr_name = "PROP?"
+    elif attr_name in ["position", "awake"]:
+      attr_name += "?"
       
     attr_name = attr_name.upper()
     if attr_name in SerialCLI.COMMANDS:
