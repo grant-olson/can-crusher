@@ -2,6 +2,7 @@ Work in progress for a hobby project that combines CAD design,
 Hardware, PCB design, firmware, and software to build an over-the-top
 computer-controlled can crusher.
 
+![Crusher at home](./can-crusher-in-kitchen.jpg)
 ![Cad render](./can-crusher-cad.png)
 
 Blog posts detailing progress:
