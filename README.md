@@ -2,12 +2,15 @@ Work in progress for a hobby project that combines CAD design,
 Hardware, PCB design, firmware, and software to build an over-the-top
 computer-controlled can crusher.
 
-![Crusher at home](./can-crusher-in-kitchen.jpg)
-![Cad render](./can-crusher-cad.png)
-
 Blog posts detailing progress:
 
 1. [Designing and building the frame](https://www.grant-olson.net/news/2022/10/03/can-crusher-1.html)
 2. [Initial stepper driver implementation](https://www.grant-olson.net/news/2022/10/09/can-crusher-2.html)
 3. [First PCB run](https://www.grant-olson.net/news/2022/10/18/can-crusher-3.html)
 4. [Torwards Production Software](https://www.grant-olson.net/news/2022/10/31/can-crusher-4.html)
+5. [Mechanical Updates](https://www.grant-olson.net/news/2022/11/11/can-crusher-5.html)
+
+
+![Crusher at home](./can-crusher-in-kitchen.jpg)
+![Cad render](./can-crusher-cad.png)
+
