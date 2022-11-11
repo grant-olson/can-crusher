@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+
+from serial_cli import *
+import statistics
+from time import sleep
+import sys
+
+cli = SerialCLI("/dev/ttyUSB0")
+
+threshold = int(cli.get_prop("STALLGUARD_THRESHOLD"))
+print("STARTING STALLGUARD THRESHOLD: %d" % threshold)
+
+def find_can():
+  found_can = False
+
+  cli.sleep()
+  cli.wake()
+  
+  try:
+    cli.move(-200, 10)
+  except SerialException:
+    found_can = True
+
+    
+  if not found_can:
+    raise RuntimeError("NO CAN")
+
+  can_size = float(cli.position())
+  print("FOUND CAN AT %f" % can_size)
+  
+def crush_can():
+  bad_count = 0
+  print("SETTING UP TO CRUSH")
+  
+  cli.sleep()
+  cli.wake()
+  
+  print("STARTING 3 mm per second")
+  
+  for i in range(0,5):
+    cli.move(5, 10)
+    try:
+      cli.move(-10, 3)
+    except SerialException:
+      bad_count += 1
+      print("X")
+      pass
+
+  print("FINISHED 3 mm per second")
+  print("STARTING 5 mm per second")
+  
+  for i in range(0,5):
+    cli.move(5, 10)
+    try:
+      cli.move(-10, 5)
+    except SerialException:
+      bad_count += 1
+      print("X")
+      pass
+
+  print("FINISHED 5 mm per second")
+  print("STARTING 7 mm per second")
+  
+  for i in range(0,5):
+    cli.move(5, 10)
+    try:
+      cli.move(-10, 7)
+    except SerialException:
+      bad_count += 1
+      print("X")
+      pass
+
+  print("FINISHED 7 mm per second")
+  cli.set_prop("STALLGUARD_THRESHOLD", threshold - 10)
+  cli.sleep()
+  cli.wake()
+
+  print("STARTING 10 mm per second")
+  for i in range(0,10):
+    cli.move(10, 10)
+    try:
+      cli.move(-15, 10)
+    except SerialException:
+      bad_count += 1
+      print("Y")
+
+  print("FINISHED 10 mm per second")
+      
+def release_can():
+  cli.reset_props()
+  cli.sleep()
+  cli.wake()
+    
+  cli.move(75, 10)
+
+try:
+  find_can()
+  crush_can()
+  release_can()
+finally:
+  cli.reset_props()
+  cli.sleep()
