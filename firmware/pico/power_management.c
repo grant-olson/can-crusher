@@ -2,6 +2,7 @@
 #include "pico/stdlib.h"
 #include "pico/time.h"
 #include "motor.h"
+#include "power.h"
 #include "power_management.h"
 
 
