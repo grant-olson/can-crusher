@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+from can_crusher import *
+  
+class CliUI:
+  def __init__(self):
+    print("--- CLI UI ---")
+
+  def notify(self, *args):
+    message = args[0]
+
+    print("GOT %s" % message)
+
+  def request(self):
+    input("INSERT CAN AND PRESS ENTER KEY...")
+    return "ACT"
+    
+if __name__ == "__main__":
+  cc = CanCrusher("/dev/ttyUSB0", CliUI())
+  cc.run()
