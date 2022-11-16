@@ -1,4 +1,5 @@
 from PIL import Image, ImageFont, ImageDraw
+from glob import glob
 
 screen_height = 240
 screen_width = 320
@@ -30,7 +31,10 @@ def draw_button(draw):
   draw.rectangle( [(0+40,240-36), (320-40,240-12)], fill=green, outline=white)
   draw.text((45, 240-38), "INITIATE CRUSHING", white, font=bold_font)
 
-def save_raw_rgba(image, name):
+def save_raw_fb(image, name):
+  """
+  Save raw in a format that can be copied directly to /dev/fb0
+  """
   data = b''
 
   for j in range(0,screen_height):
@@ -41,7 +45,7 @@ def save_raw_rgba(image, name):
       b = pixel[2]
       data += b"%c%c%c%c" % (b,g,r,255)
 
-  f = open(name+".raw", "wb")
+  f = open("./output/raw_fb/"+name+".raw", "wb")
   f.write(data)
   f.close()
   
@@ -66,7 +70,7 @@ def save_raw_565(image, name):
       
       data += b"%c%c" % (byte1, byte2)
 
-  f = open(name+".raw565", "wb")
+  f = open("./output/raw_565/"+name+".raw565", "wb")
   f.write(data)
   f.close()
   
@@ -95,11 +99,11 @@ def make_slide(background_image, title_text, main_text, output_image):
 
   draw_button(modified_image)
   
-  image.save(output_image)
-  save_raw_rgba(image,output_image)
+  image.save("./output/png/"+output_image)
+  save_raw_fb(image,output_image)
   save_raw_565(image,output_image)
   
-fact_backgrounds = ['imgs/Lightning.png', 'imgs/earthim9.png', 'imgs/HTCHero8300.jpg']
+fact_backgrounds = glob("./background_img/*")
   
 for i, text in enumerate(facts):
     make_slide(fact_backgrounds[i%len(fact_backgrounds)], "DID YOU KNOW...", facts[i], "fact_%d.png" % i)
