@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name "PiZero")(type "KiCad")(uri "/home/grant/src/can-crusher/kicad/can-crusher/project_libs/PiZero/Library.pretty")(options "")(descr ""))
+  (lib (name "PiHat")(type "KiCad")(uri "/home/grant/src/can-crusher/kicad/can-crusher/project_libs/PiHat/Library.pretty")(options "")(descr ""))
+)
