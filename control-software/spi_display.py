@@ -195,6 +195,37 @@ class SpiDisplay:
     self.test_blue_gradient()
     sleep(2)
 
+  def rgb_to_565(self,r,g,b):
+    r = (r >> 3) << 3 # make 5 bits, packed to left
+    b = (b >> 3) # five bits, packed to right.
+    g = (g >> 2) # 6 bits
+
+    g1 = g >> 3 # top 3
+    g2 = (g & 0x7) << 5 # bottom 3 bits shifted to left.
+
+    byte1 = r + g1
+    byte2 = g2 + b
+
+    return (byte1, byte2)
+    
+  def display_pil_image(self,img):
+    """
+    Put a 320,240 PIL Image object on the screen.
+
+    This is way too slow for normal use, but helpful for
+    dev tasks and debugging.
+    """
+    self.prep_data()
+
+    for x in range(0,img.width):
+      for y in range(0,img.height):
+        pixel = img.getpixel( (x,y) )
+        r = pixel[0]
+        g = pixel[1]
+        b = pixel[2]
+        bytes = self.rgb_to_565(r,g,b)
+        self.spi.xfer(bytes)
+        
 if __name__ == "__main__":
   spi_display = SpiDisplay()
   spi_display.test_pattern()
