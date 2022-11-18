@@ -11,7 +11,7 @@ class CanCrusher:
     self.cli.kick()
     self.user_interface.notify("HOME")
     self.cli.wake()
-    self.cli.home()
+#    self.cli.home()
     self.cli.sleep()
 
     while 1:
@@ -52,8 +52,8 @@ class CanCrusher:
 
     print("STARTING 3 mm per second")
   
-    for i in range(0,5):
-      self.cli.move(5, 10)
+    for i in range(0,10):
+      self.cli.move(5, 3)
       try:
         self.cli.move(-10, 3)
       except SerialException:
@@ -61,32 +61,32 @@ class CanCrusher:
         print("X")
 
     print("FINISHED 3 mm per second")
-    print("STARTING 5 mm per second")
+#    print("STARTING 5 mm per second")
   
-    for i in range(0,7):
-      self.cli.move(5, 10)
-      try:
-        self.cli.move(-10, 5)
-      except SerialException:
-        bad_count += 1
-        print("X")
+#    for i in range(0,1):
+#      self.cli.move(5, 10)
+#      try:
+#        self.cli.move(-10, 5)
+#      except SerialException:
+#        bad_count += 1
+#        print("X")
 
-    print("FINISHED 5 mm per second")
-    threshold = int(self.cli.get_prop("STALLGUARD_THRESHOLD"))
-    self.cli.set_prop("STALLGUARD_THRESHOLD", threshold - 10)
-    self.cli.sleep()
-    self.cli.wake()
+#    print("FINISHED 5 mm per second")
+#    threshold = int(self.cli.get_prop("STALLGUARD_THRESHOLD"))
+#    self.cli.set_prop("STALLGUARD_THRESHOLD", threshold - 10)
+#    self.cli.sleep()
+#    self.cli.wake()
+#
+#    print("STARTING 10 mm per second")
+#    for i in range(0,5):
+#      self.cli.move(10, 10)
+#      try:
+#        self.cli.move(-15, 10)
+#      except SerialException:
+#        bad_count += 1
+#        print("Y")
 
-    print("STARTING 10 mm per second")
-    for i in range(0,5):
-      self.cli.move(10, 10)
-      try:
-        self.cli.move(-15, 10)
-      except SerialException:
-        bad_count += 1
-        print("Y")
-
-    print("FINISHED 10 mm per second")
+#    print("FINISHED 10 mm per second")
       
   def can_release(self):
     self.user_interface.notify("RELEASE_CAN")
@@ -94,7 +94,7 @@ class CanCrusher:
     self.cli.sleep()
     self.cli.wake()
     
-    self.cli.move(75, 10)
+    self.cli.move(150, 10)
 
   def can_full_crush(self):
     original_threshold = int(self.cli.get_prop("STALLGUARD_THRESHOLD"))

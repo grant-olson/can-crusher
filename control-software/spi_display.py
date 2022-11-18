@@ -165,7 +165,7 @@ class SpiDisplay:
       data = [0,gradient] * 240
       self.spi.xfer(data)
 
-  def slideshow(self):
+  def slide_iterator(self):
     import glob
     while 1:
       for file_name in glob.glob("*.raw565"):
@@ -178,22 +178,22 @@ class SpiDisplay:
         while len(data) > 0:
           self.spi.xfer(data)
           data = f.read(4096)
+        yield
 
-        sleep(10)
+  def slideshow(self):
+    slides = self.slide_iterator()
+    
+    for i in self.slide_iterator():
+      next(slides)
+      sleep(10)
 
   
   def test_pattern(self):
-    sleep(2)
-    self.test_random()
-    sleep(2)
-    self.test_grayscale()
-    sleep(2)
-    self.test_primary_and_secondary()
-    sleep(2)
-    self.test_red_gradient()
-    sleep(2)
-    self.test_blue_gradient()
-    sleep(2)
+    interval = 0.25
+    for test in [self.test_random, self.test_grayscale, self.test_primary_and_secondary,
+              self.test_red_gradient, self.test_blue_gradient]:
+      sleep(interval)
+      test()
 
   def rgb_to_565(self,r,g,b):
     r = (r >> 3) << 3 # make 5 bits, packed to left
