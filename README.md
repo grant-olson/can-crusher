@@ -8,6 +8,8 @@ on this project instead of going deep into a specific skill.
 
 ## The Frame
 
+![Crusher at home](./can-crusher-in-kitchen.jpg)
+
 The frame starts with 3 standard 2040 slotted aluminum extrusions. From there
 the major structural elements, the:
 
@@ -28,6 +30,8 @@ You will also need two stepper motors with rods and two smooth rods to
 assemble the frame in its entirety.
 
 ## Stepper Control Board
+
+![Stepper Controller](./stepper-control-pcba.jpg)
 
 To drive the stepper motors I've made a control board powered by a Raspberry
 Pi Pico that uses TMC2209 chips to drive the steppers. This allows me to
@@ -82,6 +86,5 @@ you to mount the parts together directly.
 5. [Mechanical Updates](https://www.grant-olson.net/news/2022/11/11/can-crusher-5.html)
 
 
-![Crusher at home](./can-crusher-in-kitchen.jpg)
 ![Cad render](./can-crusher-cad.png)
 
