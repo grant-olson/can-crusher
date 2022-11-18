@@ -63,6 +63,9 @@ code is actually running without the admin consoles set up.
 
 ## High level control and UI
 
+![Head Unit](./touchscreen-display.jpg)
+
+
 For the high level control and UI I've written a program for a Raspberry
 Pi that shows a minimal display on a TFT-LCD with touchscreen to allow users
 to interact.
