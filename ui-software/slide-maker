@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from PIL import Image, ImageFont, ImageDraw
 from glob import glob
 
@@ -103,7 +105,7 @@ def make_slide(background_image, title_text, main_text, output_image):
   save_raw_fb(image,output_image)
   save_raw_565(image,output_image)
   
-fact_backgrounds = glob("./background_img/*")
+fact_backgrounds = glob("./backgrounds/*")
   
 for i, text in enumerate(facts):
     make_slide(fact_backgrounds[i%len(fact_backgrounds)], "DID YOU KNOW...", facts[i], "fact_%d.png" % i)
