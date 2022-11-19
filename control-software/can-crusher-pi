@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-from can_crusher import *
-from config import Config
 from time import time, sleep
-import spi_display, touch_screen
+from can_crusher import can_crusher, spi_display, touch_screen
+from can_crusher.config import Config
 
 class CliUI:
   def __init__(self):
@@ -64,5 +63,5 @@ class CliUI:
       sleep(0.05) # 20 x a second should be good        
     
 if __name__ == "__main__":
-  cc = CanCrusher("/dev/ttyUSB0", CliUI())
+  cc = can_crusher.CanCrusher("/dev/ttyUSB0", CliUI())
   cc.run()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from can_crusher import *
+from can_crusher.can_crusher import *
   
 class CliUI:
   def __init__(self):

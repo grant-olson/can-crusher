@@ -1,4 +1,4 @@
-from serial_cli import *
+from .serial_cli import *
 
 class CanCrusher:
   def __init__(self, serial_device, user_interface):
