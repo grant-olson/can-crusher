@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
 
 from can_crusher import *
+from config import Config
 from time import time, sleep
 import spi_display, touch_screen
 
 class CliUI:
   def __init__(self):
     print("Pi Zero Touch Screen Interface")
+
+    self.config = Config()
+    self.config.load()
+
     self.display = spi_display.SpiDisplay()
     self.display.test_pattern()
 
-    self.calibration = touch_screen.TouchScreenCalibrator().calibrate()
+    if "calibration" in self.config:
+      self.calibration = self.config["calibration"]
+    else:
+      self.calibration = touch_screen.TouchScreenCalibrator().calibrate()
+      self.config["calibration"] = self.calibration
+      self.config.save()
+      print(repr(self.calibration))
+
     self.ts = touch_screen.TouchScreen(calibration=self.calibration)
 
     self.slides = self.display.slide_iterator()
