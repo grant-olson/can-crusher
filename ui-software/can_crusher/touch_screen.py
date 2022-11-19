@@ -105,9 +105,9 @@ class TouchScreenCalibrator():
   """
   def __init__(self):
     # defer loading since we normally DONT calibrate
-    import spi_display
+    import can_crusher.spi_display
     self.ts = TouchScreen()
-    self.sd = spi_display.SpiDisplay()
+    self.sd = can_crusher.spi_display.SpiDisplay()
   
   def draw_plus(self, draw,x,y,color=(255,255,255)):
     draw.line((x,y-5,x,y+5), fill=color)
