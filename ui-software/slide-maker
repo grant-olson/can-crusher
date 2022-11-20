@@ -2,6 +2,7 @@
 
 from PIL import Image, ImageFont, ImageDraw
 from glob import glob
+import random
 
 screen_height = 240
 screen_width = 320
@@ -13,6 +14,9 @@ height = 24
 
 bold_font = ImageFont.truetype("LiberationSans-Bold.ttf", height)
 bold_italic_font = ImageFont.truetype("LiberationSans-BoldItalic.ttf", height)
+
+random_numbers = list(range(0,2000))
+random.shuffle(random_numbers)
 
 facts = [
     "That British people PRONOUNCE aluminum differently because they SPELL it differently?",
@@ -29,11 +33,23 @@ ads = [
     "Reverend Warnock's EXTREME SOCIALISM and DANGEROUS AGENDA are TOO MUCH for GEORGIA"
 ]
 
+trivia = [
+  ("What is fun to recycle and rhymes with beryllium?", "Aluminum!"),
+  ("What metal caps the Washington Monument?", "Aluminum!"),
+  
+  ]
+
+def get_random_number():
+  return random_numbers.pop()
+
+def output_filename(type, number, base, ext):
+  return ("output/%s/%04d_%s.%s" % (type, number, base, ext))
+
 def draw_button(draw):
   draw.rectangle( [(0+40,240-36), (320-40,240-12)], fill=green, outline=white)
   draw.text((45, 240-38), "INITIATE CRUSHING", white, font=bold_font)
 
-def save_raw_fb(image, name):
+def save_raw_fb(image, filename):
   """
   Save raw in a format that can be copied directly to /dev/fb0
   """
@@ -47,11 +63,11 @@ def save_raw_fb(image, name):
       b = pixel[2]
       data += b"%c%c%c%c" % (b,g,r,255)
 
-  f = open("./output/raw_fb/"+name+".raw", "wb")
+  f = open(filename, "wb")
   f.write(data)
   f.close()
   
-def save_raw_565(image, name):
+def save_raw_565(image, filename):
   data = b''
 
   for i in range(0,screen_width):
@@ -72,40 +88,98 @@ def save_raw_565(image, name):
       
       data += b"%c%c" % (byte1, byte2)
 
-  f = open("./output/raw_565/"+name+".raw565", "wb")
+  f = open(filename, "wb")
   f.write(data)
   f.close()
+
+
+def add_text(image, text, font, color, position):
+  current_x, current_y = position
+  space_size = image.textsize(" ", font=font)[0]
   
-def make_slide(background_image, title_text, main_text, output_image):
-
-  image = Image.open(background_image)
-
-  modified_image = ImageDraw.Draw(image)
-
-  modified_image.text((0,0), title_text, yellow, font=bold_italic_font)
-    
-  current_x, current_y = 0, height * 1
-
-  space_size = modified_image.textsize(" ", font=bold_font)[0]
-
-  words = main_text.split(" ")
+  words = text.split(" ")
   for word in words:
-    next_word_length, next_word_height = modified_image.textsize(word, font=bold_font)
+    next_word_length, next_word_height = image.textsize(word, font=font)
     if (current_x + next_word_length) >= 320:
       print("OVERFLOW AT %s" % word)
       current_y += height
       current_x = 0
-    modified_image.text((current_x, current_y), word, white, font=bold_font)
+    image.text((current_x, current_y), word, color, font=font)
     current_x += next_word_length
     current_x += space_size
 
-  draw_button(modified_image)
+  if current_x != 0:
+    current_y += height
+    current_x = 0
+    
+  return (current_x, current_y)
+
+def save_variants(random_id, image, filename):
+          
+  image.save(output_filename("png",random_id, filename, "png"))
+  save_raw_fb(image,output_filename("raw_fb", random_id, filename, "raw"))
+  save_raw_565(image,output_filename("raw_565", random_id, filename, ".565"))
+
+def make_fact_slide(background_image, title_text, main_text):
+
+  image = Image.open(background_image)
+
+  position = (0,0)
+  modified_image = ImageDraw.Draw(image)
+
+  position = add_text(modified_image, title_text, bold_italic_font, yellow, position)
+  add_text(modified_image, main_text, bold_font, white, position) 
   
-  image.save("./output/png/"+output_image)
-  save_raw_fb(image,output_image)
-  save_raw_565(image,output_image)
+  draw_button(modified_image)
+
+  random_id = get_random_number()
+
+  save_variants(random_id, image, "facts")
+  
+def make_attack_slide(attack_text):
+
+  image = Image.new("RGB", (320,240), color=(0xFF,0xA5, 0))
+
+  position = (0,0)
+  modified_image = ImageDraw.Draw(image)
+
+  add_text(modified_image, attack_text, bold_font, white, position) 
+  
+  draw_button(modified_image)
+
+  random_id = get_random_number()
+
+  save_variants(random_id, image, "attack_ads")
+  
+def make_trivia_slide(background_image, trivia):
+  image = Image.open(background_image)
+
+  position = (0,0)
+  modified_image = ImageDraw.Draw(image)
+
+  position = add_text(modified_image, "Trivia!", bold_italic_font, yellow, position)
+  position = add_text(modified_image, "Q: " + trivia[0], bold_font, white, position) 
+  
+  draw_button(modified_image)
+
+  random_id = get_random_number()
+
+  save_variants(random_id, image, "1_trivia")
+
+  position = add_text(modified_image, "A: " + trivia[1], bold_font, yellow, position) 
+
+  save_variants(random_id, image, "2_trivia")
+
   
 fact_backgrounds = glob("./backgrounds/*")
-  
+
+
+
 for i, text in enumerate(facts):
-    make_slide(fact_backgrounds[i%len(fact_backgrounds)], "DID YOU KNOW...", facts[i], "fact_%d.png" % i)
+  make_fact_slide(fact_backgrounds[i%len(fact_backgrounds)], "DID YOU KNOW...", facts[i])
+
+for i, trivia in enumerate(trivia):
+  make_trivia_slide(fact_backgrounds[i%len(fact_backgrounds)], trivia)
+
+for i, attack in enumerate(ads):
+  make_attack_slide(attack)
