@@ -168,7 +168,9 @@ class SpiDisplay:
   def slide_iterator(self):
     import glob
     while 1:
-      for file_name in glob.glob("*.raw565"):
+      slides = glob.glob("output/raw_565/*.565")
+      slides.sort()
+      for file_name in slides:
 
         f = open(file_name,"rb")
 
