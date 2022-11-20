@@ -1,4 +1,5 @@
 from .serial_cli import *
+import os
 
 class CanCrusher:
   def __init__(self, serial_device, user_interface):
@@ -11,7 +12,8 @@ class CanCrusher:
     self.cli.kick()
     self.user_interface.notify("HOME")
     self.cli.wake()
-#    self.cli.home()
+    if not os.getenv("CC_NO_HOME"):
+      self.cli.home()
     self.cli.sleep()
 
     while 1:
