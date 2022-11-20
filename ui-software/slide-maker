@@ -3,6 +3,7 @@
 from PIL import Image, ImageFont, ImageDraw
 from glob import glob
 import random
+import os
 
 screen_height = 240
 screen_width = 320
@@ -118,7 +119,7 @@ def save_variants(random_id, image, filename):
           
   image.save(output_filename("png",random_id, filename, "png"))
   save_raw_fb(image,output_filename("raw_fb", random_id, filename, "raw"))
-  save_raw_565(image,output_filename("raw_565", random_id, filename, ".565"))
+  save_raw_565(image,output_filename("raw_565", random_id, filename, "565"))
 
 def make_fact_slide(background_image, title_text, main_text):
 
@@ -173,6 +174,10 @@ def make_trivia_slide(background_image, trivia):
   
 fact_backgrounds = glob("./backgrounds/*")
 
+for dir in ["png", "raw_fb", "raw_565"]:
+  full_dir = "output/%s" % dir
+  if not os.path.exists(full_dir):
+    os.makedirs(full_dir)
 
 
 for i, text in enumerate(facts):
