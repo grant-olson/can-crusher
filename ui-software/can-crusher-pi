@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import os
 from time import time, sleep
+
 from can_crusher import can_crusher, spi_display, touch_screen
 from can_crusher.config import Config
 
@@ -31,6 +33,13 @@ class CliUI:
 
     print("GOT %s" % message)
 
+    file_name = "output/admin/raw_565/%s.565" % message
+
+    if not os.path.exists(file_name):
+      file_name = "output/admin/raw_565/UNKNOWN.565"
+
+    self.display.xfer_raw_565_file(file_name)
+    
   def request(self):
     start_time = 0
     while True:
