@@ -10,6 +10,7 @@ class CanCrusher:
     self.user_interface.notify("INIT")
     self.cli = SerialCLI(self.serial_device)
     self.cli.kick()
+    self.cli.power_on()
     self.user_interface.notify("HOME")
     self.cli.wake()
     if not os.getenv("CC_NO_HOME"):
@@ -19,6 +20,7 @@ class CanCrusher:
     while 1:
       msg = self.user_interface.request()
       if msg == "ACT":
+        self.cli.power_on() # make sure we're on
         self.can_find()
         self.can_crush()
         self.can_release()
