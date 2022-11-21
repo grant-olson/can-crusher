@@ -73,5 +73,5 @@ class CliUI:
     
 if __name__ == "__main__":
   print("STARTING can-crusher-pi") # get something in journalctl log when a service
-  cc = can_crusher.CanCrusher("/dev/ttyUSB0", CliUI())
+  cc = can_crusher.CanCrusher("/dev/serial0", CliUI())
   cc.run()

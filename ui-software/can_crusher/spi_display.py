@@ -92,11 +92,6 @@ class SpiDisplay:
 
     madctl = lcd_refresh_right_to_left + lcd_brg
 
-    # Currently the screen is 'upside-down' because of the
-    # location of the Pi Zero's USB port, so we need this.
-    # NOTE: If this is changed back touch screen calibrations
-    # are invalid and should be reset.
-    madctl += lcd_right_to_left + lcd_bottom_to_top
     self.send_cmd(0x36, madctl) # MADCTL
 
     self.send_cmd(0x29) # display ON
