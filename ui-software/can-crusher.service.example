@@ -1,0 +1,17 @@
+[Unit]
+Description=Can Crusher
+After=basic.target
+
+[Service]
+Type=simple
+User=grant
+SupplementaryGroups=spi
+Environment=PYTHONUNBUFFERED=1
+PermissionsStartOnly=true
+ExecStart=/home/grant/src/can-crusher/ui-software/can-crusher-pi
+WorkingDirectory=/home/grant/src/can-crusher/ui-software/
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
