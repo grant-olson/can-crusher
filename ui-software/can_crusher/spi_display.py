@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import spidev
 from time import sleep
 from PIL import Image
-
+from pathlib import Path
 
 class SpiDisplay:
   """
@@ -22,6 +22,7 @@ class SpiDisplay:
     self.reset_pin = 5
     self.dc_pin = 6
     self.init_gpio()
+    self.wait_for_udev()
     self.init_spi()
     self.init_display()
     
@@ -36,7 +37,31 @@ class SpiDisplay:
     GPIO.output(self.reset_pin, 1)
     GPIO.output(self.reset_pin, 0)
     GPIO.output(self.reset_pin, 1)
-    
+
+  def wait_for_udev(self):
+    """
+    We must wait for (1) the spidev file to exist, and (2) udev.rules to
+    give the spi group permission. If we don't we have problems spawning
+    from a systemd service as things aren't set up yet
+    """
+    saw_spidev=False
+
+    spidev10 = Path("/dev/spidev1.0")
+    for i in range(0,60):
+      if not spidev10.exists():
+        print("Couldn't find spidev after %d seconds. Waiting..." % i)
+      else:
+        if spidev10.group() != "spi":
+          print("spidev group not set up yet after %d seconds. Waiting..." % i)
+        else:
+          saw_spidev=True
+          break
+      sleep(1)
+
+    if not saw_spidev:
+      raise RuntimeError("NEVER FOUND SPIDEV!")
+      
+
   def init_spi(self):
     self.spi = spidev.SpiDev()
     self.spi.open(1,0)
