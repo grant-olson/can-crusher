@@ -15,6 +15,7 @@ height = 24
 
 bold_font = ImageFont.truetype("LiberationSans-Bold.ttf", height)
 bold_italic_font = ImageFont.truetype("LiberationSans-BoldItalic.ttf", height)
+big_bold_font = ImageFont.truetype("LiberationSans-Bold.ttf", height*2)
 
 random_numbers = list(range(0,2000))
 random.shuffle(random_numbers)
@@ -43,8 +44,11 @@ trivia = [
 def get_random_number():
   return random_numbers.pop()
 
-def output_filename(type, number, base, ext):
-  return ("output/%s/%04d_%s.%s" % (type, number, base, ext))
+def output_filename(group, file_format, sequence_number, base_name, ext):
+  if sequence_number is None:
+    return ("output/%s/%s/%s.%s" % (group, file_format, base_name, ext))
+  else:
+    return ("output/%s/%s/%04d_%s.%s" % (group, file_format, sequence_number, base_name, ext))
 
 def draw_button(draw):
   draw.rectangle( [(0+40,240-36), (320-40,240-12)], fill=green, outline=white)
@@ -96,14 +100,14 @@ def save_raw_565(image, filename):
 
 def add_text(image, text, font, color, position):
   current_x, current_y = position
-  space_size = image.textsize(" ", font=font)[0]
+  space_size, space_height = image.textsize(" ", font=font)
   
   words = text.split(" ")
   for word in words:
     next_word_length, next_word_height = image.textsize(word, font=font)
     if (current_x + next_word_length) >= 320:
       print("OVERFLOW AT %s" % word)
-      current_y += height
+      current_y += space_height
       current_x = 0
     image.text((current_x, current_y), word, color, font=font)
     current_x += next_word_length
@@ -115,11 +119,11 @@ def add_text(image, text, font, color, position):
     
   return (current_x, current_y)
 
-def save_variants(random_id, image, filename):
+def save_variants(group, image, filename, random_id=None):
           
-  image.save(output_filename("png",random_id, filename, "png"))
-  save_raw_fb(image,output_filename("raw_fb", random_id, filename, "raw"))
-  save_raw_565(image,output_filename("raw_565", random_id, filename, "565"))
+  image.save(output_filename(group, "png",random_id, filename, "png"))
+  #save_raw_fb(image,output_filename(group, "raw_fb", random_id, filename, "raw"))
+  save_raw_565(image,output_filename(group, "raw_565", random_id, filename, "565"))
 
 def make_fact_slide(background_image, title_text, main_text):
 
@@ -135,7 +139,7 @@ def make_fact_slide(background_image, title_text, main_text):
 
   random_id = get_random_number()
 
-  save_variants(random_id, image, "facts")
+  save_variants("slides", image, "facts", random_id)
   
 def make_attack_slide(attack_text):
 
@@ -150,7 +154,7 @@ def make_attack_slide(attack_text):
 
   random_id = get_random_number()
 
-  save_variants(random_id, image, "attack_ads")
+  save_variants("slides", image, "attack_ads", random_id)
   
 def make_trivia_slide(background_image, trivia):
   image = Image.open(background_image)
@@ -165,26 +169,50 @@ def make_trivia_slide(background_image, trivia):
 
   random_id = get_random_number()
 
-  save_variants(random_id, image, "1_trivia")
+  save_variants("slides", image, "1_trivia", random_id)
 
   position = add_text(modified_image, "A: " + trivia[1], bold_font, yellow, position) 
 
-  save_variants(random_id, image, "2_trivia")
+  save_variants("slides", image, "2_trivia", random_id)
 
+def make_admin_slide(cmd, msg):
+  image = Image.new("RGB", (320,240), color=(0, 0, 0))
+  position = (0,24)
+  modified_image = ImageDraw.Draw(image)
+
+  position = add_text(modified_image, msg, big_bold_font, white, position)
+
+  save_variants("admin", image, cmd)
   
 fact_backgrounds = glob("./backgrounds/*")
 
-for dir in ["png", "raw_fb", "raw_565"]:
-  full_dir = "output/%s" % dir
-  if not os.path.exists(full_dir):
-    os.makedirs(full_dir)
+for dir in ["slides", "admin"]:
+  for subdir in ["png", "raw_fb", "raw_565"]:
+    full_dir = "output/%s/%s" % (dir, subdir)
+    if not os.path.exists(full_dir):
+      os.makedirs(full_dir)
 
+def make_slides():
+  for i, text in enumerate(facts):
+    make_fact_slide(fact_backgrounds[i%len(fact_backgrounds)], "DID YOU KNOW...", facts[i])
 
-for i, text in enumerate(facts):
-  make_fact_slide(fact_backgrounds[i%len(fact_backgrounds)], "DID YOU KNOW...", facts[i])
+  for i, trivia in enumerate(trivia):
+    make_trivia_slide(fact_backgrounds[i%len(fact_backgrounds)], trivia)
 
-for i, trivia in enumerate(trivia):
-  make_trivia_slide(fact_backgrounds[i%len(fact_backgrounds)], trivia)
+  for i, attack in enumerate(ads):
+    make_attack_slide(attack)
 
-for i, attack in enumerate(ads):
-  make_attack_slide(attack)
+admin_screens = { "HOME": "Homing...",
+                  "INIT": "Initializing...",
+                  "FIND_CAN": "Locating Can...",
+                  "CRUSH_CAN": "Crushing Can...",
+                  "RELEASE_CAN": "Done. Releasing Can...",
+                  "UNKNOWN": "Working..."
+                  }
+
+def make_admin():
+  for cmd, msg in admin_screens.items():
+    make_admin_slide(cmd, msg)
+
+if __name__ == "__main__":
+  make_admin()
