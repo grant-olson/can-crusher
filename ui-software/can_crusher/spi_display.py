@@ -85,7 +85,14 @@ class SpiDisplay:
 
     self.send_cmd(0x51, 0xFF) # full bright
 
-    self.send_cmd(0x36, 12) # MADCTL
+    lcd_refresh_right_to_left = 4
+    lcd_brg = 8
+    lcd_right_to_left = 64
+    lcd_bottom_to_top = 128
+
+    madctl = lcd_refresh_right_to_left + lcd_brg
+
+    self.send_cmd(0x36, madctl) # MADCTL
 
     self.send_cmd(0x29) # display ON
 
