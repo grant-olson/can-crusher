@@ -46,6 +46,14 @@ class SerialCLI:
   
   def __init__(self, device):
     self.device = device
+
+    test_conn = serial.Serial(device, 115200, timeout=1)
+    test_conn.write(b"KICK\n")
+    results = test_conn.readline()
+    if len(results) == 0:
+      raise SerialException("Serial Client Not Receiving!")
+    test_conn.close()
+
     self.serial_conn = serial.Serial(device, 115200)
 
   def get_error_code(self, result):

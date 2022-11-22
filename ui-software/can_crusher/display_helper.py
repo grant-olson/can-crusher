@@ -199,8 +199,8 @@ class DisplayHelper:
 
     self.save_variants("slides", image, "2_trivia", random_id)
 
-  def make_admin_slide(self, cmd, msg):
-    image = Image.new("RGB", (320,240), color=(0, 0, 0))
+  def make_admin_slide(self, cmd, msg, bg_color=(0,0,0)):
+    image = Image.new("RGB", (320,240), color=bg_color)
     position = (0,24)
     modified_image = ImageDraw.Draw(image)
 

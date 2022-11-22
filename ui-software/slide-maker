@@ -55,7 +55,8 @@ def make_admin():
   for cmd, msg in admin_screens.items():
     sys.stdout.write(".")
     display_helper.make_admin_slide(cmd, msg)
-
+  display_helper.make_admin_slide("ERROR", "FATAL ERROR", (255,0,0))
+  
 if __name__ == "__main__":
   display_helper.make_directory_skeleton()
 

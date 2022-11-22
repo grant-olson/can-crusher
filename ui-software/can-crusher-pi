@@ -6,6 +6,8 @@ from time import time, sleep
 from can_crusher import can_crusher, spi_display, touch_screen, display_helper
 from can_crusher.config import Config
 
+from can_crusher.serial_cli import SerialException
+
 class CliUI:
   def __init__(self):
     print("Pi Zero Touch Screen Interface")
@@ -29,6 +31,10 @@ class CliUI:
     self.display_helper = display_helper.DisplayHelper()
     self.slides = self.display_helper.slide_iterator()
 
+  def display_fatal_error(self):
+    file_name = self.display_helper.get_admin_screen_file_name("ERROR")
+    self.display.xfer_raw_565_file(file_name)
+    
   def notify(self, *args):
     message = args[0]
 
@@ -71,5 +77,11 @@ class CliUI:
     
 if __name__ == "__main__":
   print("STARTING can-crusher-pi") # get something in journalctl log when a service
-  cc = can_crusher.CanCrusher("/dev/serial0", CliUI())
-  cc.run()
+  try:
+    ui = CliUI()
+    cc = can_crusher.CanCrusher("/dev/serial0", ui)
+    cc.run()
+  except SerialException as ex:
+    if "Serial Client Not Receiving!" not in repr(ex):
+      raise
+    ui.display_fatal_error()
