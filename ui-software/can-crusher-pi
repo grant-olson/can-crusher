@@ -44,7 +44,8 @@ class CliUI:
       delta = current_time - start_time
       if delta > 10:
         start_time = current_time
-        next(self.slides)
+        next_slide = next(self.slides)
+        self.display.xfer_raw_565_file(next_slide)
       click = self.ts.get_button_click_scaled()
       if click is not None:
         print("GOT CLICK %s" % repr(click))

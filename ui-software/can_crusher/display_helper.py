@@ -242,19 +242,11 @@ class DisplayHelper:
         raise RuntimeError("No pregenerated slides. Did you run ./slide-maker?")
       slides.sort()
       for file_name in slides:
-        self.xfer_raw_565_file(file_name)
-        yield
+        yield file_name
 
-  def slideshow(self):
-    slides = self.slide_iterator()
-    
-    for i in self.slide_iterator():
-      next(slides)
-      sleep(10)
-
-  def get_admin_screen_file_name(self):
+  def get_admin_screen_file_name(self, cmd):
     file_name = "%s/%s/raw_565/%s.565" % (self.root_output_dir,
-                                          self.admin_prefix, message)
+                                          self.admin_prefix, cmd)
 
     if not os.path.exists(file_name):
       file_name = "%s/%s/raw_565/UNKNOWN.565" %(self.root_output_dir,
