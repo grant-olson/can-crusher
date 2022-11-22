@@ -206,26 +206,6 @@ class SpiDisplay:
     while len(data) > 0:
       self.spi.xfer(data)
       data = f.read(4096)
-
-      
-  def slide_iterator(self):
-    import glob
-    while 1:
-      slides = glob.glob("output/slides/raw_565/*.565")
-      if len(slides) == 0:
-        raise RuntimeError("No pregenerated slides. Did you run ./slide-maker?")
-      slides.sort()
-      for file_name in slides:
-        self.xfer_raw_565_file(file_name)
-        yield
-
-  def slideshow(self):
-    slides = self.slide_iterator()
-    
-    for i in self.slide_iterator():
-      next(slides)
-      sleep(10)
-
   
   def test_pattern(self):
     interval = 0.25
