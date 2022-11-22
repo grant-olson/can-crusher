@@ -57,8 +57,8 @@ class CanCrusher:
     print("STARTING 3 mm per second")
   
     for i in range(0,10):
-      self.cli.move(5, 3)
       try:
+        self.cli.move(5, 3)
         self.cli.move(-10, 3)
       except SerialException:
         bad_count += 1
