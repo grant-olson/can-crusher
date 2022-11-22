@@ -81,7 +81,6 @@ if __name__ == "__main__":
     ui = CliUI()
     cc = can_crusher.CanCrusher("/dev/serial0", ui)
     cc.run()
-  except SerialException as ex:
-    if "Serial Client Not Receiving!" not in repr(ex):
-      raise
+  except:
     ui.display_fatal_error()
+    raise
