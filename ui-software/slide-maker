@@ -9,22 +9,29 @@ fact_backgrounds = glob("./backgrounds/*")
 
 facts = [
     "That British people PRONOUNCE aluminum differently because they SPELL it differently?",
-    "Napolean Bonaparte treasured his rare aluminum-ware, and he forced his guests to eat with lowly gold-ware?",
+    "Napolean III treasured his rare aluminum-ware, and forced his guests to eat with lowly gold-ware?",
     "When alien archeologists discover a dead Earth, that pure Aluminum will be the primary marker of the Anthropocene Era?",
     "Before Development of the BESSEMER PROCESS pure Aluminum was extremely rare?",
     "Aluminum has an Atomic Number of 13?",
-    "Aluminum based antiperspirant works by clogging your sweat pores and may give you ALZHEIMERS?"
+    "Aluminum based antiperspirant works by clogging your sweat pores and may give you ALZHEIMERS?",
+    "Canada exports over $11 billion worth of Aluminum annually.",
+    "Recycling aluminum requires 95% less energy than producing it from bauxite ore."
+    "Powdered Aluminum is used in explosives and fireworks.",
+    "NASA's Orion spacecraft was be built with aluminum.",
+    "The Aluminum Association was established in 1933.",
+    "Aluminum is the 12th most abundant element in outer space.",
     ]
 
 
 ads = [
-    "Hershell Walker is WRONG for GEORGIA and the SENATE.",
-    "Reverend Warnock's DANGEROUS AGENDA are TOO MUCH for GEORGIA"
+    "Hershell Walker is WRONG for GEORGIA and the UNITED STATES SENATE.",
+    "Reverend Warnock's DANGEROUS AGENDA is TOO MUCH for GEORGIA"
 ]
 
 trivia = [
   ("What is fun to recycle and rhymes with beryllium?", "Aluminum!"),
   ("What metal caps the Washington Monument?", "Aluminum!"),
+  ("Who is the world's largest Aluminum producer?", "China produces 37 million tons annually")
   
   ]
 
