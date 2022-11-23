@@ -145,6 +145,13 @@ class DisplayHelper:
     #save_raw_fb(image,output_filename(self, group, "raw_fb", random_id, filename, "raw"))
     self.save_raw_565(image,self.output_filename(group, "raw_565", random_id, filename, "565"))
 
+  def make_png_slide(self, png_name):
+
+    image = Image.open(png_name)
+    random_id = self.get_random_number()
+
+    self.save_variants(self.slide_prefix, image, "png", random_id)
+
   def make_fact_slide(self, background_image, title_text, main_text):
 
     image = Image.open(background_image)
