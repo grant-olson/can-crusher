@@ -2,4 +2,5 @@
   (lib (name "btt_tmc2209")(type "KiCad")(uri "${KIPRJMOD}/project_libs/btt_tmc2209/btt_tmc2209.pretty")(options "")(descr ""))
   (lib (name "RPi_Pico")(type "KiCad")(uri "${KIPRJMOD}/project_libs/KiCad-RP-Pico/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
   (lib (name "R1966")(type "KiCad")(uri "${KIPRJMOD}/project_libs/R1966")(options "")(descr ""))
+  (lib (name "3522")(type "KiCad")(uri "${KIPRJMOD}/project_libs/3522")(options "")(descr ""))
 )

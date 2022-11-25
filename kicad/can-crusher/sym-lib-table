@@ -1,4 +1,5 @@
 (sym_lib_table
   (lib (name "Pi Pico")(type "KiCad")(uri "${KIPRJMOD}/project_libs/KiCad-RP-Pico/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.kicad_sym")(options "")(descr ""))
   (lib (name "btt_tmc2209")(type "KiCad")(uri "${KIPRJMOD}/project_libs/btt_tmc2209/btt_tmc2209.kicad_sym")(options "")(descr ""))
+  (lib (name "3522-2")(type "KiCad")(uri "${KIPRJMOD}/project_libs/3522/3522-2.kicad_sym")(options "")(descr ""))
 )
