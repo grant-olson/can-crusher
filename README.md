@@ -75,7 +75,21 @@ Pi that shows a minimal display on a TFT-LCD with touchscreen to allow users
 to interact.
 
 To make a compact display I've created a Hat for a Pi Zero board that allows
-you to mount the parts together directly.
+you to mount the parts together directly that is also released as a KiCad file.
+
+Due to continuing Raspberry Pi shortages I'd like to build some
+alternate versions of the control boards for other SBCs. The software
+itself iswritten in python and should be portable to pretty much any
+linux system. There are only 3 hardware requirements so I expect other
+boards will be easy to integrate:
+
+* Ability to have a hardware level SPI control with /dev/spidevX.X exposed.
+
+* A kernel that supports ADS7846  touch screens and provides integration with
+    `evdev` to read touch screen events.
+
+* A hardware serial/uart port capable of running at 115200 baud.
+
 
 ## In depth blog posts on design and content
 
