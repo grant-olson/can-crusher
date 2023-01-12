@@ -6,6 +6,10 @@ Hardware, PCB design, firmware, and software to build an over-the-top
 computer-controlled can crusher. I wanted to use a wide variety of skills
 on this project instead of going deep into a specific skill.
 
+## In depth 30 minute video on the project
+
+[The Most Technologically Advanced Aluminum Can Crusher In The World](https://youtu.be/nmYN3EZNI_g)
+
 ## The Frame
 
 ![Crusher at home](./can-crusher-in-kitchen.jpg)
@@ -89,15 +93,6 @@ boards will be easy to integrate:
     `evdev` to read touch screen events.
 
 * A hardware serial/uart port capable of running at 115200 baud.
-
-
-## In depth blog posts on design and content
-
-1. [Designing and building the frame](https://www.grant-olson.net/news/2022/10/03/can-crusher-1.html)
-2. [Initial stepper driver implementation](https://www.grant-olson.net/news/2022/10/09/can-crusher-2.html)
-3. [First PCB run](https://www.grant-olson.net/news/2022/10/18/can-crusher-3.html)
-4. [Torwards Production Software](https://www.grant-olson.net/news/2022/10/31/can-crusher-4.html)
-5. [Mechanical Updates](https://www.grant-olson.net/news/2022/11/11/can-crusher-5.html)
 
 
 ![Cad render](./can-crusher-cad.png)
