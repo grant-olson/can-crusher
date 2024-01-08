@@ -26,6 +26,12 @@ class CliUI:
       self.config.save()
       print(repr(self.calibration))
 
+    if "motors" in self.config:
+      if "stallguard_threshold" in self.config["motors"]:
+        self.stallguard_threshold = self.config["motors"]["stallguard_threshold"]
+      else:
+        self.stallguard_threshold = None
+      
     self.ts = touch_screen.TouchScreen(calibration=self.calibration)
 
     self.display_helper = display_helper.DisplayHelper()
@@ -80,6 +86,8 @@ if __name__ == "__main__":
   try:
     ui = CliUI()
     cc = can_crusher.CanCrusher("/dev/serial0", ui)
+    if ui.stallguard_threshold is not None:
+      cc.stallguard_threshold = ui.stallguard_threshold
     cc.run()
   except:
     ui.display_fatal_error()

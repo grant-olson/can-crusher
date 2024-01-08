@@ -5,12 +5,15 @@ class CanCrusher:
   def __init__(self, serial_device, user_interface):
     self.serial_device = serial_device
     self.user_interface = user_interface
+    self.stallguard_threshold = None
 
   def run(self):
     self.user_interface.notify("INIT")
     self.cli = SerialCLI(self.serial_device)
     self.cli.kick()
     self.cli.power_on()
+    if self.stallguard_threshold is not None:
+      self.cli.set_prop("STALLGUARD_THRESHOLD", self.stallguard_threshold)
     self.user_interface.notify("HOME")
     self.cli.wake()
     if not os.getenv("CC_NO_HOME"):
