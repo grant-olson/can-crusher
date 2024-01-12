@@ -26,11 +26,10 @@ class CliUI:
       self.config.save()
       print(repr(self.calibration))
 
+    self.stallguard_threshold = None
     if "motors" in self.config:
       if "stallguard_threshold" in self.config["motors"]:
         self.stallguard_threshold = self.config["motors"]["stallguard_threshold"]
-      else:
-        self.stallguard_threshold = None
       
     self.ts = touch_screen.TouchScreen(calibration=self.calibration)
 
