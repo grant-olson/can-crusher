@@ -531,20 +531,16 @@ int motors_home() {
   
   uint stall_status = motors_move_mm(true, true, -400, home_speed);
 
-  while (stall_status != 3) {
+  puts("Starting Home");
+  
+  for (int i=0;i<4;i++) {
+    printf("Iteration %d", i);
     motors_sleep(); motors_wake(); // clear stallguard bit
-
-    if (stall_status == 1) {
-      motors_move_mm(false, true, -1, home_speed);
-    }
-    
-
-    if (stall_status == 2) {
-      motors_move_mm(true, false, -1, home_speed);
-    }
 
     puts("Backing up...");
     motors_move_mm(true, true, 25, home_speed);
+    motors_sleep(); motors_wake(); // clear stallguard bit
+    
     puts("Re-homing");
     stall_status = motors_move_mm(true, true, -30, home_speed);
   }
